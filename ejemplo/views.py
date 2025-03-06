@@ -3,6 +3,11 @@ from django.http import HttpResponse,JsonResponse,Http404
 #from django.http import JsonResponse
 from rest_framework.response import Response
 from http import HTTPStatus
+#upload
+from django.core.files.storage import FileSystemStorage
+import os
+from datetime import datetime, timedelta
+
 
 
 
@@ -87,6 +92,76 @@ class Class_Ejemplo_Parametros(APIView):
             "estado":"confirmado",
             "mensaje":f"Metodo delete |id={id} Elemento eliminado correctamente"
             }, status=HTTPStatus.OK)
+        
+        
+#la clase upload es de ejemplo para subir archivos por 
+#lo tanto debe ser post y no recibe parametros por url        
+"""class Class_EjemploUpload(APIView):
+    def post(self, request):
+        #crea una instancia de FileSystemStorage
+        fs = FileSystemStorage()
+        # Obtener la fecha y hora actual como timestamp
+        fecha = datetime.now()
+        # mediante datetime se obtiene la fecha y hora actual y se convierte a timestamp
+        #asi se evita estar colocando el tipo de archivo que se sube
+        foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['file']))[1]}"
+        #guarda el archivo en la carpeta ejemplo con la informacion de la variable foto, esta tiene la fecha
+        fs.save(f"ejemplo/{foto}",request.FILES['file'])
+        #retorna la url del archivo y hace el guardado de forma completa
+        fs.url(request.FILES['file'])
+        #retorna un json con el mensaje de que el archivo se subio correctamente
+        return JsonResponse({"estado":"ok","mensaje":"archivo subido correctamente"})"""
+    
+#otra forma de realizar la subida es:
+"""from django.http import JsonResponse
+from django.core.files.storage import FileSystemStorage
+from datetime import datetime
+import os"""
+
+class Class_EjemploUpload(APIView):
+    def post(self, request):
+        try:
+            # Verificar si el archivo está presente en la solicitud
+            if 'file' not in request.FILES:
+                return JsonResponse({"estado": "error", "mensaje": "No se encontró ningún archivo en la solicitud"}, status=400)
+
+            # Crear una instancia de FileSystemStorage
+            fs = FileSystemStorage()
+
+            # Obtener la fecha y hora actual como timestamp
+            fecha = datetime.now()
+            # Convertir a entero para evitar decimales
+            timestamp = int(datetime.timestamp(fecha)) 
+            # Obtener la extensión del archivo subido
+            file = request.FILES['file']
+
+            extension = os.path.splitext(file.name)[1]
+
+            # Crear un nombre único para el archivo, que contiene fecha y extension
+            foto = f"{timestamp}{extension}"
+
+            # Guardar el archivo en la carpeta "ejemplo/"
+            file_path = fs.save(f"ejemplo/{foto}", file)
+
+            # Obtener la URL del archivo guardado
+            file_url = fs.url(file_path)
+
+            # Retornar respuesta exitosa con la URL del archivo
+            return JsonResponse({"estado": "ok", "mensaje": "Archivo subido correctamente", "url": file_url})
+
+        except Exception as e:
+            # Manejo de excepciones generales
+            return JsonResponse({"estado": "error", "mensaje": f"Error al subir el archivo: {str(e)}"}, status=500)
+
+    
+        
+    
+        
+    
+        
+    
+    
+        
         
     
     
