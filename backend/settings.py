@@ -11,7 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+#este modulo permite usar cualquiera de las variables de entorno
 import os
+#este modulo permite cargar las variables de entorno
+from dotenv import load_dotenv
+#se ejecuta la funcion para cargar las variables de entorno
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,12 +85,18 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv('DATABASE_BD'),#se carga la variable de entorno
+        "USER": os.getenv('DATABASE_USER'),#se carga la variable de entorno
+        "PASSWORD": os.getenv('DATABASE_PASSWORD'),#se carga la variable de entorno
+        "HOST": os.getenv('DATABASE_SERVER'),#se carga la variable de entorno
+        "PORT": os.getenv('DATABASE_PORT'),#se carga la variable de entorno
+        "OPTIONS": {
+            'autocommit': True,
+        }
     }
 }
-
-
+ 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

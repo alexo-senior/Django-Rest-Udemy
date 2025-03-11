@@ -142,7 +142,7 @@ class Class_EjemploUpload(APIView):
 
             # Guardar el archivo en la carpeta "ejemplo/"
             file_path = fs.save(f"ejemplo/{foto}", file)
-
+ 
             # Obtener la URL del archivo guardado
             file_url = fs.url(file_path)
 
@@ -152,7 +152,9 @@ class Class_EjemploUpload(APIView):
         except Exception as e:
             # Manejo de excepciones generales
             return JsonResponse({"estado": "error", "mensaje": f"Error al subir el archivo: {str(e)}"}, status=500)
+        k
 
+    
     
         
     
