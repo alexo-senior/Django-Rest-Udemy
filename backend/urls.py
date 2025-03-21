@@ -10,12 +10,14 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', include('home.urls')),
-    path('api/v1/',include('ejemplo.urls')),
+    path('', include('home.urls')),#ruta base de home
+    path('api/v1/',include('ejemplo.urls')),#ruta base de ejemplo
+    path('api/v1/',include('categorias.urls')),#la ruta base de categorias
+    
 ]
 
 #estos son los archivos que se encuentran en el settings.py, 
-# los estamos importando para que se puedan subir archivos
+# los estamos importando para que se puedan subir archivos multimedia
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

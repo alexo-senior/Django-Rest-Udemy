@@ -152,7 +152,8 @@ class Class_EjemploUpload(APIView):
         except Exception as e:
             # Manejo de excepciones generales
             return JsonResponse({"estado": "error", "mensaje": f"Error al subir el archivo: {str(e)}"}, status=500)
-        k
+        
+        
 
     
     

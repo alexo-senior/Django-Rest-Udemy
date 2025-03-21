@@ -31,9 +31,14 @@ SECRET_KEY = "django-insecure-29sqef_q1x(e$9huyj&!we3(+#wj6zmlr!-ls97zvnb5leo=f^
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #cambiar a FALSE en produccion
-DEBUG = True
+#EL VALOR True se cambia por la varibale de .env DEBUG
+# de esa forma se nos hace muy funcional el manejo de los entornos
+#de desarrollo y produccion
+ 
+DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'rest_framework',
     'home',
+    'categorias',
 ]
 
 MIDDLEWARE = [
@@ -96,7 +102,7 @@ DATABASES = {
         }
     }
 }
- 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -121,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "es-es"
 
-TIME_ZONE = "America/Colombia"
+TIME_ZONE = "America/Bogota"
 
 USE_I18N = True
 
