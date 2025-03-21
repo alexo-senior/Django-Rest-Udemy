@@ -14,9 +14,9 @@ class Categoria(models.Model):
     #generar una subclase para generar datos meta
     #una version en singular y otra en plural
     class Meta:
-        db_table = 'categorias'
-        verbose_name = 'categoria'#singular
-        verbose_name_plural = 'categorias'#plural
+        db_table = 'categorias'#indica el nombre de la tabla en el admon de django
+        verbose_name = 'categoria'#variable singular
+        verbose_name_plural = 'categorias'#varible plural
         
         
         
