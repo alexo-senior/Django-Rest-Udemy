@@ -1,12 +1,10 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from django.http.response import JsonResponse
-from rest_framework.response import Response
-from . models import Categoria
-from . serializers import CategoriaSerializer
 from http import HTTPStatus
-from django.http import Http404
+from django.http.response import JsonResponse
 from django.utils.text import slugify
+from rest_framework.views import APIView
+from .models import Categoria
+from .serializers import CategoriaSerializer
+from django.http import Http404
 
 
 
@@ -47,7 +45,7 @@ class Clase1(APIView):
                 
         
 
-#listar un registro por su id
+#LISTAR UN REGISTRO POR SU ID
 class Clase2(APIView):
     def get(self, request, id):
         try:
@@ -57,29 +55,72 @@ class Clase2(APIView):
             return JsonResponse({'data':{'id':data.id,'nombre':data.nombre, 'slug':data.slug}}, status=HTTPStatus.OK)
         #se le agrega el manejo de errores try except, el DoesnotExist es el 
         #error que parece cuando no se encuentra el registro, por lo tanto lo puedes copiar
-        except Categoria.DoesnotExist:
+        except Categoria.DoesNotExist:  # Correcto
             raise Http404
+
         
-        
+    #MODIFICAR O EDITAR UN REGISTRO POR SU ID FUNCION PUT   
     def put(self, request, id):
-        if request.data.get("nombre")==None:
-            return JsonResponse({"estado":"error", "mensaje":"el campo nombre no puesde estar vacio"},
+        nombre = request.data.get("nombre")
+        #vallidar que el campo nombre no este vacio
+        if not nombre:
+            return JsonResponse({"estado":"error", "mensaje": "el campo nombre no puede estar vacio"}, 
             status= HTTPStatus.BAD_REQUEST)
-            
-        if not request.data.get("nombre"):
-            return JsonResponse({"estado":"error", "mensaje":"el campo nombre no puesde estar vacio"},
-            status= HTTPStatus.BAD_REQUEST)
-            #se recomienda colocar una excepcion
         try:
-            data = Categoria.objects.filter(id=id).get()#pk es lo mismo que id
-            #se obtiene por filter de la categoria el id y por medio de update 
-            #se actualiza el nombre solamente al que pertenece el id
-            Categoria.objects.filter(id=id).update(nombre=request.data.get('nombre'), 
-            slug=slugify(request.data.get('nombre')))
-            return JsonResponse({"estado": "ok", "mensaje": "se modifica el registro exitosamente"}, 
+            #analizar directamente el registro si existe
+            data = Categoria.objects.get(id=id)
+            data.nombre = nombre
+            data.slug = slugify(nombre)
+            data.save()
+            #validacion para que el caso de exito al modificar el registro
+            return JsonResponse({"estado": "ok", "mensaje": "se modifica el registro con exito"}, 
             status=HTTPStatus.OK)
+            #validacion en caso de que no exista el registro
         except Categoria.DoesNotExist:
-            raise Http404
+            return JsonResponse({"estado": "error" , "mensaje": "el registro no existe"}, 
+            status=HTTPStatus.NOT_FOUND)
+            #validacion en caso que haya algun error
+        except Exception as e:
+            return JsonResponse({"estado": "error", "mensaje": "ocurrio un error"}, 
+            status=HTTPStatus.INTERNAL_SERVER_ERROR) 
+                                
+                                
+        
+        
+        #METODO DELETE FUNCION PARA ELIMINAR
+        
+    def delete(self, requesT, id):
+        try:
+        # Verificar si el registro existe antes de eliminarlo
+            categoria = Categoria.objects.filter(id=id)
+            if not categoria.exists():
+                return JsonResponse(
+                    {"estado": "error", "mensaje": "El registro no existe"},
+                    status=HTTPStatus.NOT_FOUND
+            )
+        
+        # Eliminar el registro
+            categoria.delete()
+            return JsonResponse(
+                {"estado": "ok", "mensaje": "Se elimina el registro exitosamente"},
+                status=HTTPStatus.OK
+        )
+        except Exception as e:
+        # Manejo genérico de errores
+            return JsonResponse(
+                {"estado": "error", "mensaje": "Ocurrió un error inesperado"},
+                status=HTTPStatus.INTERNAL_SERVER_ERROR
+        )
+        
+        
+        
+        
+        
+    
+        
+        
+        
+        
                 
             
                 
