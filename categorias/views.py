@@ -111,6 +111,11 @@ class Clase2(APIView):
                 {"estado": "error", "mensaje": "Ocurrió un error inesperado"},
                 status=HTTPStatus.INTERNAL_SERVER_ERROR
         )
+            
+            
+            
+            
+            
         
         
         
