@@ -7,8 +7,9 @@ from categorias.models import Categoria
 
 # Create your models here.
 class Receta(models.Model):
+    
     #llave foranea para relacionar las recetas a las categorias enteriores
-    categoria = models.ForeignKey(Categoria, models.DO_NOTHING, default=1)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='recetas')
     nombre = models.CharField(max_length=100, null=False)
     #AutoSlugField genera automáticamente un slug basado en otro campo de tu modelo. Esto es muy útil porque te evita tener que crear y mantener slugs manualmente
     #el campo populate_from le dice al autslug que campo va a ser el que se va a tomar para generar el slug
@@ -35,6 +36,7 @@ class Receta(models.Model):
         db_table = 'recetas'#indica el nombre de la tabla en el admon de django
         verbose_name = 'Receta'#variable singular
         verbose_name_plural = 'Recetas'#varible plural
+        
         
         
 

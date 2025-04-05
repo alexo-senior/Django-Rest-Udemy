@@ -7,3 +7,4 @@ urlpatterns = [
     #path('categorias/<int:id>',Clase2.as_view()),
 ]
 
+
