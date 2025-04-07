@@ -56,7 +56,7 @@ class Class_Ejemplo_Parametros(APIView):
     
     
     def post(self, request, id):
-        #return HttpResponse(f"Esta es una salida put de Rest framework'| parametro={id}")
+        #return HttpResponse(f"Esta es una salida post de Rest framework'| parametro={id}")
         return JsonResponse({
     "estado": "confirmado",
     "mensaje": f"Metodo POST| name={request.data.get('name')} | lastname={request.data.get('lastname')}"
