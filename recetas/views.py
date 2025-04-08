@@ -6,6 +6,12 @@ from rest_framework.response import Response  # Importa Response
 from .serializers import RecetaSerializer
 from .models import *
 from rest_framework import status #import status
+from django.utils.dateformat import DateFormat
+import os
+from dotenv import load_dotenv
+
+
+
 
 # Create your views here.
 """class Clase1(APIView):
@@ -32,6 +38,39 @@ class Clase1(APIView):
             return Response({"data": datos_json.data}, status=status.HTTP_200_OK)  # Devuelve 200 OK
         except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
+            
+#CONSULTAR RECETA POR ID            
+        
+class Clase2(APIView):
+    def get(self, request, id):
+        try:
+            #consulta los objetos receta por id
+            data = Receta.objects.filter(id=id).get()
+            
+            if not data:
+            #si no hay datos devuelve un 204 no content
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            #formateo de todos los datos de la receta, entonces por medio del id se obtiene la receta 
+            return Response({"data":{"id":data.id, "nombre":data.nombre, "slug":data.slug, "tiempo":data.tiempo,
+                                    "descripcion":data.descripcion, "fecha":DateFormat(data.fecha).format("d/m/Y"),
+                                    "categoria_id":data.categoria_id, "imagen":f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}"}}, 
+                            status=status.HTTP_200_OK)
+                                    
+                                    
+            #return Response({"data": datos_json.data}, status=status.HTTP_200_OK)
+        except Receta.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        #maneja la excepcion en caso de error de servidor
+        except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        
+            
+        
+        
+        
             
         
             

@@ -15,9 +15,9 @@ class Receta(models.Model):
     #el campo populate_from le dice al autslug que campo va a ser el que se va a tomar para generar el slug
     slug = AutoSlugField(populate_from='nombre', max_length=50 )
     tiempo = models.CharField(max_length=100, null=True)
-    #solo para guardar el nombre no la foto como tal, asi evitas problemas
+    #solo para guardar el nombre no la foto como tal no el archivo en si
     foto = models.CharField(max_length=100, null=True)
-    #sin tildes ni caracteres especiales
+    #sin tildes ni caracteres especiales, texfield para mucho texto
     descripcion = models.TextField()
     #para configurar la fecha ded forma automatica
     fecha = models.DateTimeField(auto_now_add=True, null=True)
@@ -37,7 +37,7 @@ class Receta(models.Model):
         verbose_name = 'Receta'#variable singular
         verbose_name_plural = 'Recetas'#varible plural
         
-        
+    
         
         
         
