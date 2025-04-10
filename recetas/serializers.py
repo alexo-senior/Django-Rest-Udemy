@@ -40,6 +40,7 @@ class RecetaSerializer(serializers.ModelSerializer):
     
     
     
+    
 
         
         

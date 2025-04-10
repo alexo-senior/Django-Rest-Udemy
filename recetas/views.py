@@ -9,6 +9,8 @@ from rest_framework import status #import status
 from django.utils.dateformat import DateFormat
 import os
 from dotenv import load_dotenv
+from datetime import datetime
+
 
 
 
@@ -40,6 +42,36 @@ class Clase1(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             
+    #METODO POST PARA CREAR UNA NUEVA RECETA        
+    def post(self, request):
+            try:
+                Receta.objects.create(
+                        nombre=request.data["nombre"],
+                        tiempo=request.data["tiempo"],
+                        descripcion=request.data["descripcion"],
+                        categoria_id=request.data["categoria_id"],  # Corregido
+                        foto="nada por el momento"  # Puedes ajustar esto según sea necesario
+                    )
+
+                return Response(
+                    {"message": "Receta creada exitosamente"},
+                        status=status.HTTP_201_CREATED
+                )
+
+            except Categoria.DoesNotExist:
+                return Response(
+                    {"error": "La categoría especificada no existe."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            except Exception as e:
+                return Response(
+                    {"error": f"Error al crear la receta: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            
+            
             
 #CONSULTAR RECETA POR ID            
         
@@ -65,6 +97,7 @@ class Clase2(APIView):
         #maneja la excepcion en caso de error de servidor
         except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             
         
             

@@ -37,6 +37,7 @@ class Receta(models.Model):
         verbose_name = 'Receta'#variable singular
         verbose_name_plural = 'Recetas'#varible plural
         
+        
     
         
         
