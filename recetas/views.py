@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from http import HTTPStatus
+from http import HTTPStatus 
 from django.http import JsonResponse, Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response  # Importa Response
@@ -9,7 +9,7 @@ from rest_framework import status #import status
 from django.utils.dateformat import DateFormat
 import os
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime 
 
 
 
@@ -27,6 +27,7 @@ from datetime import datetime
         #el metodo data convierte el objeto en un diccionario de python
         return JsonResponse({"data": datos_json.data})"""
         
+#LA CLASE1 SE TOMA PARA LOS GET Y POST YA QUE NO REQUIERE ID
 class Clase1(APIView):
     def get(self, request):
         try:
@@ -42,39 +43,67 @@ class Clase1(APIView):
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             
-    #METODO POST PARA CREAR UNA NUEVA RECETA        
+            
+            
+    #METODO POST PARA CREAR UNA NUEVA RECETA 
+    #TENER EN CUENTA A MI PARECER QUE SOLO ACTUALIZA POR NOMBRE DE LA RECETA       
     def post(self, request):
-            try:
-                Receta.objects.create(
-                        nombre=request.data["nombre"],
-                        tiempo=request.data["tiempo"],
-                        descripcion=request.data["descripcion"],
-                        categoria_id=request.data["categoria_id"],  # Corregido
-                        foto="nada por el momento"  # Puedes ajustar esto según sea necesario
-                    )
-
+        #validacion de cada campo esta vez el campo nombre
+        if request.data.get("nombre") == None or not request.data["nombre"]:
+            
+            return Response({"estado":"error", "mensaje": "el campo nombre es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+        
+        if request.data.get("tiempo") == None or not request.data["tiempo"]:
+            return Response({"estado":"error", "mensaje": "el campo tiempo es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+        
+        if request.data.get("descripcion") == None or not request.data["descripcion"]:
+            return Response({"estado":"error", "mensaje": "el campo descripcion es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+            
+        if request.data.get("categoria_id") == None or not request.data["categoria_id"]:
+            return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
+                            
+                        status=HTTPStatus.BAD_REQUEST)
+        try:
+            #primero se valida si la receta ya existe por el nombre con filter() y exist()
+            if Receta.objects.filter(nombre=request.data["nombre"]).exists():
+                #hago un retorno con un format para que salga mas especifica la busqueda errada
                 return Response(
-                    {"message": "Receta creada exitosamente"},
+                    {"estado": "error", "mensaje": f"El nombre{request.data["nombre"]} no esta disponible"},
+                    status=HTTPStatus.BAD_REQUEST)
+            #luego si no existe se crea la receta con create
+            Receta.objects.create(
+                    nombre=request.data["nombre"],
+                    tiempo=request.data["tiempo"],
+                    descripcion=request.data["descripcion"],
+                    categoria_id=request.data["categoria_id"],  # Corregido
+                    foto="nada por el momento"  # Puedes ajustar esto según sea necesario
+                )
+
+            return Response(
+                {"message": "Receta creada exitosamente"},
                         status=status.HTTP_201_CREATED
-                )
+            )
 
-            except Categoria.DoesNotExist:
-                return Response(
-                    {"error": "La categoría especificada no existe."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+        except Categoria.DoesNotExist:
+            return Response(
+                {"error": "La categoría especificada no existe."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-            except Exception as e:
-                return Response(
-                    {"error": f"Error al crear la receta: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+        except Exception as e:
+            return Response(
+                {"error": f"Error al crear la receta: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
             
             
             
             
 #CONSULTAR RECETA POR ID            
-        
+#LA CLASE2 SE TOMA PARA LOS GET, PUT  Y DELETE YA QUE REQUIERE ID   
 class Clase2(APIView):
     def get(self, request, id):
         try:
@@ -98,7 +127,57 @@ class Clase2(APIView):
         except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+    #METODO PUT PARA ACTUALIZAR UNA RECETA POR ID    
+    def put(self, request, id):
+        try:
+            receta = Receta.objects.get(id=id)
             
+            # Actualiza los campos de la receta con los datos proporcionados
+            receta.nombre = request.data.get("nombre", receta.nombre)
+            receta.tiempo = request.data.get("tiempo", receta.tiempo)
+            receta.descripcion = request.data.get("descripcion", receta.descripcion)
+            receta.categoria_id = request.data.get("categoria_id", receta.categoria_id)
+            
+            # Guarda los cambios
+            receta.save()
+            return Response({
+                    "mensaje":"rececta actualizada correctament"
+                }, status=status.HTTP_200_OK)
+        except Receta.DoesNotExist:
+                return Response({
+                    "mensaje": "receta no existe"
+                })
+                
+        except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
+    #METODO PARA ELIMINAR REGISTROS POR ID
+    
+    def delete(self, request, id):
+        try:
+            #primero verrifica si la receta existe
+            receta = Receta.objects.get(id=id)
+            #elimina la receta
+            receta.delete()
+            return Response({"estado": "ok", "mensaje":"receta eliminada corrrectamente"},
+                            status=status.HTTP_200_OK)
+            
+        except Receta.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "la receta no existe"},
+                            status=status.HTTPSTTP_404_NOT_FOUND)
+        #maneja cualquier error    
+        except Exception as e:
+            return Response ({"error": str(e)}, 
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
+            
+        
+            
+            
+                
+        
         
             
         

@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from . models import *
 from dotenv import load_dotenv
-import os#para cargar las variables de entorno
+import os #para cargar las variables de entorno
 
 #crear los serializadores
+#SERIALIZER ES EL INTERPRETE PARA DAR UNA SALIDA LEGIBLE EN FORMATO JSON
 #se crea la clase RecetaSerializer que hereda de serializers.ModelSerializer
 class RecetaSerializer(serializers.ModelSerializer):
     #ESTO ES FORMATEAR INFORMACION 
@@ -31,6 +32,7 @@ class RecetaSerializer(serializers.ModelSerializer):
         #se carga la variable de entorno BASE_URL que contiene la url base de la api
         #y se retorna la url completa de la imagen de la receta
         return f"{os.getenv("BASE_URL")}uploads/recetas/{obj.foto}"
+    
     
     
     

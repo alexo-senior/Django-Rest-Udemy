@@ -6,6 +6,7 @@ from categorias.models import Categoria
 
 
 # Create your models here.
+#LOS MODELOS SON LAS TABLAS DE MI BASE DE DATOS
 class Receta(models.Model):
     
     #llave foranea para relacionar las recetas a las categorias enteriores
@@ -36,6 +37,9 @@ class Receta(models.Model):
         db_table = 'recetas'#indica el nombre de la tabla en el admon de django
         verbose_name = 'Receta'#variable singular
         verbose_name_plural = 'Recetas'#varible plural
+        
+        
+        
         
         
     
