@@ -9,7 +9,11 @@ from rest_framework import status #import status
 from django.utils.dateformat import DateFormat
 import os
 from dotenv import load_dotenv
-from datetime import datetime 
+from datetime import datetime
+#la importacion es para manejar los archivos multimedia
+from django.core.files.storage import FileSystemStorage
+
+
 
 
 
@@ -66,20 +70,49 @@ class Clase1(APIView):
             return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
                             
                         status=HTTPStatus.BAD_REQUEST)
+        #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria
+        #se usa el metodo filter() para filtrar los objetos de la categoria por id y luego se usa el metodo get() para obtener el objeto
+        try:
+            categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
+        except Categoria.DoesNotExist:
+            return Response({"estado":"error", "mensaje": "la categoria no existe"},
+                            status=HTTPStatus.BAD_REQUEST)
+            
+            
+        
         try:
             #primero se valida si la receta ya existe por el nombre con filter() y exist()
             if Receta.objects.filter(nombre=request.data["nombre"]).exists():
                 #hago un retorno con un format para que salga mas especifica la busqueda errada
+                #el format en la respuesta de errores no es recomendable por la seguridad 
                 return Response(
                     {"estado": "error", "mensaje": f"El nombre{request.data["nombre"]} no esta disponible"},
                     status=HTTPStatus.BAD_REQUEST)
+            #modulo para manejar las imagenes    
+            fs = FileSystemStorage()
+            
+            try:
+                fecha = datetime.now()  # Define 'fecha' with the current datetime
+                foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['foto']))[1]}"
+            except Exception as e:
+                return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
+                                status=HTTPStatus.BAD_REQUEST)
+            try:
+                fs.save(f"ejemplo/{foto}",request.FILES['foto'])
+        #retorna la url del archivo y hace el guardado de forma completa
+                fs.url(request.FILES['foto'])
+            except Exception as e:
+                return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
+                                status=HTTPStatus.BAD_REQUEST)
+            
+                
             #luego si no existe se crea la receta con create
             Receta.objects.create(
                     nombre=request.data["nombre"],
                     tiempo=request.data["tiempo"],
                     descripcion=request.data["descripcion"],
                     categoria_id=request.data["categoria_id"],  # Corregido
-                    foto="nada por el momento"  # Puedes ajustar esto según sea necesario
+                    foto= foto 
                 )
 
             return Response(
@@ -170,6 +203,7 @@ class Clase2(APIView):
         except Exception as e:
             return Response ({"error": str(e)}, 
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             
             
             
