@@ -98,7 +98,7 @@ class Clase1(APIView):
                 return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
                                 status=HTTPStatus.BAD_REQUEST)
             try:
-                fs.save(f"ejemplo/{foto}",request.FILES['foto'])
+                fs.save(f"recetas/{foto}",request.FILES['foto'])
         #retorna la url del archivo y hace el guardado de forma completa
                 fs.url(request.FILES['foto'])
             except Exception as e:
@@ -203,6 +203,7 @@ class Clase2(APIView):
         except Exception as e:
             return Response ({"error": str(e)}, 
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             
             
             
