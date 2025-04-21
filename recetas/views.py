@@ -78,59 +78,65 @@ class Clase1(APIView):
             return Response({"estado":"error", "mensaje": "la categoria no existe"},
                             status=HTTPStatus.BAD_REQUEST)
             
-            
-        
-        try:
             #primero se valida si la receta ya existe por el nombre con filter() y exist()
-            if Receta.objects.filter(nombre=request.data["nombre"]).exists():
+        if Receta.objects.filter(nombre=request.data["nombre"]).exists():
                 #hago un retorno con un format para que salga mas especifica la busqueda errada
                 #el format en la respuesta de errores no es recomendable por la seguridad 
-                return Response(
-                    {"estado": "error", "mensaje": f"El nombre{request.data["nombre"]} no esta disponible"},
-                    status=HTTPStatus.BAD_REQUEST)
-            #modulo para manejar las imagenes    
-            fs = FileSystemStorage()
+            return Response(
+                {"estado": "error", "mensaje": f"El nombre{request.data["nombre"]} no esta disponible"},
+                status=HTTPStatus.BAD_REQUEST)
+            #modulo para manejar las imagenes
             
-            try:
-                fecha = datetime.now()  # Define 'fecha' with the current datetime
-                foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['foto']))[1]}"
-            except Exception as e:
-                return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
+            
+        fs = FileSystemStorage()
+            
+        try:
+            fecha = datetime.now()  # Define 'fecha' with the current datetime
+            foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['foto']))[1]}"
+        except Exception as e:
+            return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
                                 status=HTTPStatus.BAD_REQUEST)
+            #valida antes de guardar la foto que los formatos sean jpg o png
+            #si es correcto se ejecuta todo el bloque de creacion y en caso de error las excepciones
+            
+            #se hace un print para probar
+        print(request.FILES["foto"].content_type)
+        if request.FILES["foto"].content_type == "image/jpeg" or request.FILES["foto"].content_type == "image/png":
+                
             try:
                 fs.save(f"recetas/{foto}",request.FILES['foto'])
-        #retorna la url del archivo y hace el guardado de forma completa
+            #retorna la url del archivo y hace el guardado de forma completa
                 fs.url(request.FILES['foto'])
             except Exception as e:
                 return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
-                                status=HTTPStatus.BAD_REQUEST)
-            
+                                    status=HTTPStatus.BAD_REQUEST)
                 
-            #luego si no existe se crea la receta con create
-            Receta.objects.create(
-                    nombre=request.data["nombre"],
-                    tiempo=request.data["tiempo"],
-                    descripcion=request.data["descripcion"],
-                    categoria_id=request.data["categoria_id"],  # Corregido
-                    foto= foto 
-                )
+            try:    
+                #luego si no existe se crea la receta con create
+                Receta.objects.create(
+                        nombre=request.data["nombre"],
+                        tiempo=request.data["tiempo"],
+                        descripcion=request.data["descripcion"],
+                        categoria_id=request.data["categoria_id"],  # Corregido
+                        foto= foto 
+                        )
+                return Response(
+                    {"message": "Receta creada exitosamente"},
+                                status=status.HTTP_201_CREATED)
+                return Response(
+                    {"error": f"Error al crear la receta: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            except Exception as e:
+                raise Http404(f"Error al crear la receta: {str(e)}")    
+            
+        return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 
+                        status=HTTPStatus.BAD_REQUEST)
 
-            return Response(
-                {"message": "Receta creada exitosamente"},
-                        status=status.HTTP_201_CREATED
-            )
+            
+    
+                
 
-        except Categoria.DoesNotExist:
-            return Response(
-                {"error": "La categoría especificada no existe."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-        except Exception as e:
-            return Response(
-                {"error": f"Error al crear la receta: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
             
             
             
@@ -140,25 +146,35 @@ class Clase1(APIView):
 class Clase2(APIView):
     def get(self, request, id):
         try:
-            #consulta los objetos receta por id
+            # Consulta los objetos receta por id
             data = Receta.objects.filter(id=id).get()
             
             if not data:
-            #si no hay datos devuelve un 204 no content
+                # Si no hay datos, devuelve un 204 no content
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            #formateo de todos los datos de la receta, entonces por medio del id se obtiene la receta 
-            return Response({"data":{"id":data.id, "nombre":data.nombre, "slug":data.slug, "tiempo":data.tiempo,
-                                    "descripcion":data.descripcion, "fecha":DateFormat(data.fecha).format("d/m/Y"),
-                                    "categoria_id":data.categoria_id, "imagen":f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}"}}, 
-                            status=status.HTTP_200_OK)
-                                    
-                                    
-            #return Response({"data": datos_json.data}, status=status.HTTP_200_OK)
+            
+            # Formateo de todos los datos de la receta
+            return Response({
+                "data": {
+                    "id": data.id,
+                    "nombre": data.nombre,
+                    "slug": data.slug,
+                    "tiempo": data.tiempo,
+                    "descripcion": data.descripcion,
+                    "fecha": DateFormat(data.fecha).format("d/m/Y"),
+                    "categoria_id": data.categoria_id,
+                    "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}"
+                }
+            }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        #maneja la excepcion en caso de error de servidor
+            return Response({"estado": "error", "mensaje": "la receta no existe"},
+                    status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Maneja cualquier error de servidor
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                    
+            
+            
             
     #METODO PUT PARA ACTUALIZAR UNA RECETA POR ID    
     def put(self, request, id):
@@ -174,7 +190,7 @@ class Clase2(APIView):
             # Guarda los cambios
             receta.save()
             return Response({
-                    "mensaje":"rececta actualizada correctament"
+                    "mensaje":"rececta actualizada correctamente"
                 }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
                 return Response({
