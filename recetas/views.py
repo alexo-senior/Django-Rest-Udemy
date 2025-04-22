@@ -44,7 +44,7 @@ class Clase1(APIView):
             datos_json = RecetaSerializer(data, many=True)
             return Response({"data": datos_json.data}, status=status.HTTP_200_OK)  # Devuelve 200 OK
         except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             
             
@@ -132,6 +132,7 @@ class Clase1(APIView):
             
         return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 
                         status=HTTPStatus.BAD_REQUEST)
+        
 
             
     
@@ -186,6 +187,8 @@ class Clase2(APIView):
             receta.tiempo = request.data.get("tiempo", receta.tiempo)
             receta.descripcion = request.data.get("descripcion", receta.descripcion)
             receta.categoria_id = request.data.get("categoria_id", receta.categoria_id)
+            #receta.slug = request.data.slug.get("slug", receta.slug)
+            
             
             # Guarda los cambios
             receta.save()
@@ -193,17 +196,44 @@ class Clase2(APIView):
                     "mensaje":"rececta actualizada correctamente"
                 }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
-                return Response({
-                    "mensaje": "receta no existe"
-                })
+            return Response({
+                "mensaje": "receta no existe"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        #validacion de cada campo esta vez el campo nombre
+        if request.data.get("nombre") == None or not request.data["nombre"]:
+            return Response({"estado":"error", "mensaje": "el campo nombre es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+        
+        if request.data.get("tiempo") == None or not request.data["tiempo"]:
+            return Response({"estado":"error", "mensaje": "el campo tiempo es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+        
+        if request.data.get("descripcion") == None or not request.data["descripcion"]:
+            return Response({"estado":"error", "mensaje": "el campo descripcion es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+            
+        if request.data.get("categoria_id") == None or not request.data["categoria_id"]:
+            return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
+                        status=HTTPStatus.BAD_REQUEST)
+                
+        try:
+            categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
+        except Categoria.DoesNotExist:
+            return Response({"estado":"error", "mensaje": "la categoria no existe"},
+                            status=HTTPStatus.BAD_REQUEST)        
                 
         except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
             
             
     #METODO PARA ELIMINAR REGISTROS POR ID
+    #ESTE METODO ES PARA BORRAR SOLO LAS RECETAS NO DED LA BASE DE DATOS
+    #NI BORRAR LA FOTO
     
-    def delete(self, request, id):
+    """def delete(self, request, id):
         try:
             #primero verrifica si la receta existe
             receta = Receta.objects.get(id=id)
@@ -219,6 +249,25 @@ class Clase2(APIView):
         except Exception as e:
             return Response ({"error": str(e)}, 
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            """
+            
+            
+    def delete(self, request, id):
+        try:
+            data = Receta.objects.get(id=id)
+        except Receta.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "la receta no existe"}, 
+                        status=status.HTTP_404_NOT_FOUND)
+        #borrar la foto
+        os.remove(f"./uploads/recetas/{data.foto}")
+        #borrar la receta
+        Receta.objects.filter(id=id).delete()
+        return Response({"estado": "ok", "mensaje":"receta eliminada correctamente"}, 
+                    status=status.HTTP_200_OK)
+
+            
+        
+            
             
             
             
