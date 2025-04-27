@@ -22,8 +22,7 @@ class Class_Ejemplo(APIView):
     def get(self, request):
         #return HttpResponse(f"Esta es una salida get| id={request.GET.get('id', None)} | slug={request.GET.get('slug', None)}")
         #return  Response({'estado':'ok','mensaje':f"Esta es una salida get| id={request.GET.get('id', None)} | slug={request.GET.get('slug', None)}"})
-        return Response({'estado':'ok','mensaje':f"Esta es una salida get| id={request.GET.get('id', None)} | slug={request.GET.get
-                        ('slug', None)}"},status=HTTPStatus.OK)
+        return Response({'estado': 'ok', 'mensaje': f"Esta es una salida get| id={request.GET.get('id', None)} | slug={request.GET.get('slug', None)}"}, status=HTTPStatus.OK)
         
     
         #este retorna un json con el mensaje que es la forma correcta 
@@ -33,8 +32,7 @@ class Class_Ejemplo(APIView):
         if request.data.get('correo') == None or request.data.get('pasword') == None:
             raise Http404#retorna el mensaje de error en caso que no haya datos
         #return HttpResponse('Esta es una salida post de Rest framework')
-        return JsonResponse({"estado":"ok", "mensaje":f"Metodo POST| correo={request.data.get('correo')}| pasword={request.data.get
-                            ('pasword')}"}, status=HTTPStatus.CREATED)
+        return Response({'estado': 'ok', 'mensaje': f"Esta es una salida get| id={request.GET.get('id', None)} | slug={request.GET.get('slug', None)}"}, status=HTTPStatus.OK)
         
         
     
@@ -60,9 +58,9 @@ class Class_Ejemplo_Parametros(APIView):
     def post(self, request, id):
         #return HttpResponse(f"Esta es una salida post de Rest framework'| parametro={id}")
         return JsonResponse({
-    "estado": "confirmado",
-    "mensaje": f"Metodo POST| name={request.data.get('name')} | lastname={request.data.get('lastname')}"
-}, status=HTTPStatus.CREATED)
+        "estado": "confirmado",
+        "mensaje": f"Metodo POST| correo={request.data.get('correo')}| pasword={request.data.get('pasword')}"
+    }, status=HTTPStatus.CREATED)
         
         
         

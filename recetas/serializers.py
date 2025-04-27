@@ -31,7 +31,7 @@ class RecetaSerializer(serializers.ModelSerializer):
         load_dotenv()#para cargar las variables de entorno, esta vez BASE_URL
         #se carga la variable de entorno BASE_URL que contiene la url base de la api
         #y se retorna la url completa de la imagen de la receta
-        return f"{os.getenv("BASE_URL")}uploads/recetas/{obj.foto}"
+        return f"{os.getenv('BASE_URL')}uploads/recetas/{obj.foto}"
     
     
     

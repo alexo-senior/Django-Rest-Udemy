@@ -82,9 +82,12 @@ class Clase1(APIView):
         if Receta.objects.filter(nombre=request.data["nombre"]).exists():
                 #hago un retorno con un format para que salga mas especifica la busqueda errada
                 #el format en la respuesta de errores no es recomendable por la seguridad 
-            return Response(
-                {"estado": "error", "mensaje": f"El nombre{request.data["nombre"]} no esta disponible"},
-                status=HTTPStatus.BAD_REQUEST)
+            return Response({"estado": "error", "mensaje": f"El nombre {request.data['nombre']} no está disponible"}, status=HTTPStatus.BAD_REQUEST)
+        
+                            
+            
+
+
             #modulo para manejar las imagenes
             
             
@@ -264,6 +267,9 @@ class Clase2(APIView):
         Receta.objects.filter(id=id).delete()
         return Response({"estado": "ok", "mensaje":"receta eliminada correctamente"}, 
                     status=status.HTTP_200_OK)
+
+
+
 
             
         
