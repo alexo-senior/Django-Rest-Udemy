@@ -25,6 +25,8 @@ class Clase1(APIView):
         return JsonResponse({"data": data_json.data}, status=HTTPStatus.OK)
         #se puede hacer una respuesta tipo response para probar que los datos se estan mostrando correctamente
         #return Response(data)
+
+
         
         #SE CREA LA FUNCION PARA EL METODO POST
     def post(self, request):
@@ -36,7 +38,8 @@ class Clase1(APIView):
         # Se crea un nuevo registro en la tabla Categoria solo enviando el nombre
             Categoria.objects.create(nombre=request.data['nombre'])
             # Se retorna una respuesta JsonResponse con un mensaje de éxito y un estado 201
-            return JsonResponse({"estado": "ok", "mensaje": "se crea el registro exitosamente"}, status=HTTPStatus.CREATED)
+            return JsonResponse({"estado": "ok", "mensaje": "se crea el registro exitosamente"}, 
+                            status=HTTPStatus.CREATED)
         except Exception as e:
             raise Http404
         

@@ -85,12 +85,6 @@ class Clase1(APIView):
             return Response({"estado": "error", "mensaje": f"El nombre {request.data['nombre']} no está disponible"}, status=HTTPStatus.BAD_REQUEST)
         
                             
-            
-
-
-            #modulo para manejar las imagenes
-            
-            
         fs = FileSystemStorage()
             
         try:
@@ -136,6 +130,12 @@ class Clase1(APIView):
         return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 
                         status=HTTPStatus.BAD_REQUEST)
         
+            
+
+
+            #modulo para manejar las imagenes
+            
+            
 
             
     
@@ -182,52 +182,49 @@ class Clase2(APIView):
             
     #METODO PUT PARA ACTUALIZAR UNA RECETA POR ID    
     def put(self, request, id):
+        # Validaciones antes de buscar la receta
+        if request.data.get("nombre") is None or not request.data["nombre"]:
+            return Response({"estado": "error", "mensaje": "el campo nombre es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        if request.data.get("tiempo") is None or not request.data["tiempo"]:
+            return Response({"estado": "error", "mensaje": "el campo tiempo es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        if request.data.get("descripcion") is None or not request.data["descripcion"]:
+            return Response({"estado": "error", "mensaje": "el campo descripcion es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        if request.data.get("categoria_id") is None or not request.data["categoria_id"]:
+            return Response({"estado": "error", "mensaje": "el campo categoria_id es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        # Validar que la categoría exista antes de actualizar
+        # Se usa filter() y get() para obtener el objeto de la categoría
+        try:
+            categoria = Categoria.objects.get(pk=request.data["categoria_id"])
+        except Categoria.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "la categoria no existe"},
+                            status=HTTPStatus.BAD_REQUEST)
+
+        # Buscar la receta
         try:
             receta = Receta.objects.get(id=id)
-            
-            # Actualiza los campos de la receta con los datos proporcionados
-            receta.nombre = request.data.get("nombre", receta.nombre)
-            receta.tiempo = request.data.get("tiempo", receta.tiempo)
-            receta.descripcion = request.data.get("descripcion", receta.descripcion)
-            receta.categoria_id = request.data.get("categoria_id", receta.categoria_id)
-            #receta.slug = request.data.slug.get("slug", receta.slug)
-            
-            
-            # Guarda los cambios
-            receta.save()
-            return Response({
-                    "mensaje":"rececta actualizada correctamente"
-                }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
-            return Response({
-                "mensaje": "receta no existe"
-            }, status=status.HTTP_404_NOT_FOUND)
+            return Response({"mensaje": "receta no existe"}, status=status.HTTP_404_NOT_FOUND)
 
-        #validacion de cada campo esta vez el campo nombre
-        if request.data.get("nombre") == None or not request.data["nombre"]:
-            return Response({"estado":"error", "mensaje": "el campo nombre es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-        
-        if request.data.get("tiempo") == None or not request.data["tiempo"]:
-            return Response({"estado":"error", "mensaje": "el campo tiempo es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-        
-        if request.data.get("descripcion") == None or not request.data["descripcion"]:
-            return Response({"estado":"error", "mensaje": "el campo descripcion es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-            
-        if request.data.get("categoria_id") == None or not request.data["categoria_id"]:
-            return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-                
+        # Actualizar los campos de la receta
+        receta.nombre = request.data.get("nombre", receta.nombre)
+        receta.tiempo = request.data.get("tiempo", receta.tiempo)
+        receta.descripcion = request.data.get("descripcion", receta.descripcion)
+        receta.categoria = categoria  # Asigna el objeto de la categoría
+
+        # Guardar los cambios
         try:
-            categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
-        except Categoria.DoesNotExist:
-            return Response({"estado":"error", "mensaje": "la categoria no existe"},
-                            status=HTTPStatus.BAD_REQUEST)        
-                
+            receta.save()
+            return Response({"mensaje": "receta actualizada correctamente"}, status=status.HTTP_200_OK)
         except Exception as e:
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
             
@@ -267,6 +264,8 @@ class Clase2(APIView):
         Receta.objects.filter(id=id).delete()
         return Response({"estado": "ok", "mensaje":"receta eliminada correctamente"}, 
                     status=status.HTTP_200_OK)
+    
+
 
 
 
