@@ -13,7 +13,9 @@ urlpatterns = [
     path('', include('home.urls')),#ruta base de home
     path('api/v1/',include('ejemplo.urls')),#ruta base de ejemplo
     path('api/v1/',include('categorias.urls')),#la ruta base de categorias
-    path('api/v1/',include('recetas.urls')),#la ruta de recetas nueva app
+    path('api/v1/',include('recetas.urls')),#la ruta de recetas nueva app recetas
+    path('api/v1/',include('contacto.urls'))##ruta de contacto nueva app contacto
+    #path('api/v1/',include('contacto.urls'))#ruta de contacto nueva app contacto
     
 ]
 
