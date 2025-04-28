@@ -259,11 +259,16 @@ class Clase2(APIView):
             return Response({"estado": "error", "mensaje": "la receta no existe"}, 
                         status=status.HTTP_404_NOT_FOUND)
         #borrar la foto
+        #al dar el punto se le indica que la foto esta en el directrio uploads/recetas
+        # (raiz del proyecto)
         os.remove(f"./uploads/recetas/{data.foto}")
-        #borrar la receta
+        #borrar la receta de la base de datos aunque no se debe hacer
+        #se usa el metodo filter() para filtrar los objetos de la receta por id 
+        # y luego se usa el metodo delete() para eliminar el objeto
         Receta.objects.filter(id=id).delete()
         return Response({"estado": "ok", "mensaje":"receta eliminada correctamente"}, 
                     status=status.HTTP_200_OK)
+    
     
 
 

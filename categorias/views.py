@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from .models import Categoria
 from .serializers import CategoriaSerializer
 from django.http import Http404
+from recetas.models import Receta
 
 
 
@@ -100,6 +101,11 @@ class Clase2(APIView):
                 return JsonResponse(
                     {"estado": "error", "mensaje": "El registro no existe"},
                     status=HTTPStatus.NOT_FOUND
+            )
+            if Receta.objects.filter(categoria_id=id).exists():
+                return JsonResponse(
+                    {"estado": "error", "mensaje": "No se puede eliminar la categoria porque tiene recetas asociadas"},
+                    status=HTTPStatus.BAD_REQUEST
             )
         
         # Eliminar el registro
