@@ -28,9 +28,9 @@ class Clase1(APIView):
         try:
             Contacto.objects.create(
                 nombre = request.data['nombre'],
-                 correo = request.data['correo'],
-                  telefono = request.data['telefono'],
-                   mensaje = request.data['mensaje'])
+                correo = request.data['correo'],
+                telefono = request.data['telefono'],
+                mensaje = request.data['mensaje'])
         except Exception as e:
             #el format se usa para formatear el mensaje de error
             return JsonResponse({"estado":"error", "mensaje":"ocurrio un error al guardar el mensaje: {}".format(str(e))}, 
@@ -39,6 +39,8 @@ class Clase1(APIView):
         #este return identado a la altura del try con la creacion de los daros
         return JsonResponse({"estado":"ok", "mensaje":"el mensaje fue enviado correctamente"},
                                 status= HTTPStatus.OK)
+        
+        
         
             
             

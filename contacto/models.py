@@ -20,6 +20,8 @@ class Contacto(models.Model):
         db_table = 'contacto'
         verbose_name = "Contacto"
         verbose_name_plural = "Contactos"
+        
+        
 
 
 
