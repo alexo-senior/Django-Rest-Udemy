@@ -38,7 +38,7 @@ SECRET_KEY = "django-insecure-29sqef_q1x(e$9huyj&!we3(+#wj6zmlr!-ls97zvnb5leo=f^
 #EL VALOR True se cambia por la varibale de .env DEBUG
 # de esa forma se nos hace muy funcional el manejo de los entornos
 #de desarrollo y produccion
- 
+
 DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
