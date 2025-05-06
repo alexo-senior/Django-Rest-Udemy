@@ -9,7 +9,10 @@ class Contacto(models.Model):
     correo = models.CharField(max_length=100, blank=True)
     telefono = models.CharField(max_length=100, blank=True)
     mensaje = models.TextField()
+    #el auto_now=True se usa para que se guarde la fecha y hora actual al crear el objeto
+    #pero trabaja con la fecha de la base de de datos, no con la del servidor
     fecha = models.DateTimeField(auto_now=True)
+    
     #fecha = models.DateTimeField(default=datetime.now, blank=True)
 
     def __str(self):
