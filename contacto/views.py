@@ -47,7 +47,7 @@ class Clase1(APIView):
                     <p>Telefono: {request.data['telefono']}</p>
                     <p>Mensaje: {request.data['mensaje']}</p>
                 </body>
-            """
+            """ 
             utiles.sendMail(html, "Mensaje de prueba", request.data['correo'])
         except Exception as e:
             #el format se usa para formatear el mensaje de error

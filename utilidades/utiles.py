@@ -32,8 +32,11 @@ def sendMail(html, asunto, destinatario):
     except Exception as e:
         print(f"Error inesperado: {e}")
         return False
-    
-print("SMTP_SERVER:", os.getenv("SMTP_SERVER"))
+    #de prueba para ver si se cargan las variables de entorno
+"""print("SMTP_SERVER:", os.getenv("SMTP_SERVER"))
 print("SMTP_PORT:", os.getenv("SMTP_PORT"))
 print("SMTP_USER:", os.getenv("SMTP_USER"))
-print("SMTP_PASSWORD:", os.getenv("SMTP_PASSWORD"))
+print("SMTP_PASSWORD:", os.getenv("SMTP_PASSWORD"))"""
+
+
+

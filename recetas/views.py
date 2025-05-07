@@ -19,6 +19,7 @@ from django.core.files.storage import FileSystemStorage
 
 
 
+
 # Create your views here.
 """class Clase1(APIView):
     def get(self, request):

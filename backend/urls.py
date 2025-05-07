@@ -6,6 +6,7 @@ from django.urls import include
 #esta importacion es para poder subir archivos en el navegador
 from django.conf import settings
 from django.conf.urls.static import static
+from seguridad import seguridad
 
 
 urlpatterns = [
@@ -14,7 +15,8 @@ urlpatterns = [
     path('api/v1/',include('ejemplo.urls')),#ruta base de ejemplo
     path('api/v1/',include('categorias.urls')),#la ruta base de categorias
     path('api/v1/',include('recetas.urls')),#la ruta de recetas nueva app recetas
-    path('api/v1/',include('contacto.urls'))##ruta de contacto nueva app contacto
+    path('api/v1/',include('contacto.urls')),
+    path('api/v1/', include(seguridad.urls)),##ruta de contacto nueva app contacto
     #path('api/v1/',include('contacto.urls'))#ruta de contacto nueva app contacto
     
 ]
