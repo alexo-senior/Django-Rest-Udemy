@@ -20,7 +20,7 @@ def sendMail(html, asunto, destinatario):
     try:
         # Crear una única conexión al servidor SMTP
         server = smtplib.SMTP(os.getenv("SMTP_SERVER"), int(os.getenv("SMTP_PORT")))
-        server.set_debuglevel(1)
+        server.set_debuglevel(1)#debugea la conexion al servidor SMTP
         server.starttls()  # Inicia la conexión segura
         server.login(os.getenv("SMTP_USER"), os.getenv("SMTP_PASSWORD"))
         server.sendmail(os.getenv("SMTP_USER"), destinatario, msg.as_string())
