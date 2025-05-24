@@ -208,6 +208,9 @@ class Clase3(APIView):
         else:
             return Response({"estado":"error", "mensaje": "las credenciales no son validas"}, 
                         status=status.HTTP_401_UNAUTHORIZED)
+            
+        #AHORA COMO SE MANEJA EL TOKEN PARA LA PROTECCION DE LOS ENDPOINTS
+        
         
         
             
