@@ -7,6 +7,10 @@ from seguridad import urls as seguridad_urls  # Import the seguridad.urls module
 #esta importacion es para poder subir archivos en el navegador
 from django.conf import settings
 from django.conf.urls.static import static
+from recetas_helper import urls as recetas_helper_urls  # Import the recetas_helper.urls module
+
+
+
 
 
 
@@ -17,8 +21,7 @@ urlpatterns = [
     path('api/v1/',include('categorias.urls')),#la ruta base de categorias
     path('api/v1/',include('recetas.urls')),#la ruta de recetas nueva app recetas
     path('api/v1/', include(seguridad_urls)),
-    #path('api/v1/', include(seguridad.urls))
-    #path('api/v1/',include('contacto.urls'))
+    path('api/v1/', include(recetas_helper_urls)),  # Import the recetas_helper.urls module
     
 ]
 
