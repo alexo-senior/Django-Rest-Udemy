@@ -12,6 +12,10 @@ from dotenv import load_dotenv
 from datetime import datetime
 #la importacion es para manejar los archivos multimedia
 from django.core.files.storage import FileSystemStorage
+from seguridad.decorators import logueado
+from jose import jwt
+from django.conf import settings 
+
 
 
 
@@ -51,26 +55,32 @@ class Clase1(APIView):
             
             
     #METODO POST PARA CREAR UNA NUEVA RECETA 
-    #TENER EN CUENTA A MI PARECER QUE SOLO ACTUALIZA POR NOMBRE DE LA RECETA       
+    #TENER EN CUENTA A MI PARECER QUE SOLO ACTUALIZA POR NOMBRE DE LA RECETA
+    @logueado()
+    #decorador para que solo se pueda acceder a esta vista si el usuario esta logueado
     def post(self, request):
         #validacion de cada campo esta vez el campo nombre
         if request.data.get("nombre") == None or not request.data["nombre"]:
             
             return Response({"estado":"error", "mensaje": "el campo nombre es obligatorio"}, 
                         status=HTTPStatus.BAD_REQUEST)
-        
+        #validacion de cada campo esta vez el campo tiempo
         if request.data.get("tiempo") == None or not request.data["tiempo"]:
             return Response({"estado":"error", "mensaje": "el campo tiempo es obligatorio"}, 
                         status=HTTPStatus.BAD_REQUEST)
-        
+        #validacion de cada campo esta vez el campo descripcion
         if request.data.get("descripcion") == None or not request.data["descripcion"]:
             return Response({"estado":"error", "mensaje": "el campo descripcion es obligatorio"}, 
                         status=HTTPStatus.BAD_REQUEST)
-            
+        #validacion de cada campo esta vez el campo cateoria_id    
         if request.data.get("categoria_id") == None or not request.data["categoria_id"]:
             return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
                             
                         status=HTTPStatus.BAD_REQUEST)
+            #se crea una variable para obtener los headers de la peticion
+        header = request.headers.get('Authorization').split(' ')
+        #se valida que el token sea valido con el metodo decode() 
+        resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS256'])
         #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria
         #se usa el metodo filter() para filtrar los objetos de la categoria por id y luego se usa el metodo get() para obtener el objeto
         try:
@@ -109,24 +119,27 @@ class Clase1(APIView):
                 return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
                                     status=HTTPStatus.BAD_REQUEST)
                 
-            try:    
-                #luego si no existe se crea la receta con create
+            try:
+                # luego si no existe se crea la receta con create
                 Receta.objects.create(
                         nombre=request.data["nombre"],
                         tiempo=request.data["tiempo"],
                         descripcion=request.data["descripcion"],
                         categoria_id=request.data["categoria_id"],  # Corregido
-                        foto= foto 
+                        foto= foto, user_id=resuelto["id"],  # Asignar el ID del usuario desde el token
+                        # Asignar slug si se proporciona
                         )
                 return Response(
-                    {"message": "Receta creada exitosamente"},
+                    {"mensaje": "Receta creada exitosamente"},
                                 status=status.HTTP_201_CREATED)
+            except Exception as e:
+                # Captura errores durante la creación de la receta
+                # y devuelve un error 500 Internal Server Error
                 return Response(
                     {"error": f"Error al crear la receta: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
-            except Exception as e:
-                raise Http404(f"Error al crear la receta: {str(e)}")    
+    
             
         return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 
                         status=HTTPStatus.BAD_REQUEST)
@@ -134,17 +147,6 @@ class Clase1(APIView):
             
 
 
-            #modulo para manejar las imagenes
-            
-            
-
-            
-    
-                
-
-            
-            
-            
             
 #CONSULTAR RECETA POR ID            
 #LA CLASE2 SE TOMA PARA LOS GET, PUT  Y DELETE YA QUE REQUIERE ID   

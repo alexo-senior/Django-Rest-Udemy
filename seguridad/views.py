@@ -99,8 +99,8 @@ class Clase2(APIView):
                             "mensaje": "El token es requerido"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             # data2 contiene el objeto UsersMetadata si se encuentra el token o es igua al que me viene en la url
-            #y por medio de un nuevo filter ir a la tala User y preguntar si 
-            #el el campo is_active es igual a 0 , en filter() doble gion bajo a user__is_active
+            #y por medio de un nuevo filter ir a la tabla User y preguntar si 
+            #el  campo is_active es igual a 0 , en filter() doble gion bajo a user__is_active
             data2 = UsersMetadata.objects.filter(token=token).filter(user__is_active=0).get()
             # si no se encuentra el token se devuelve un error 
             # Si el token se encuentra, obtenemos el usuario asociado
@@ -149,8 +149,10 @@ class Clase2(APIView):
     #         return Response({"estado": "error",
     #                         "mensaje": "el token no existe"},
     #                         status=status.HTTP_400_BAD_REQUEST)
-    #VALIDACION DE CORREO 
-    #es decir a traves de un correo y un password ya registrado en labd
+    
+    
+    #VALIDACION DE CREDEENCIALES DE CORREO 
+    #es decir a traves de un correo y un password ya registrado en la bd
     #y poder loguear a un usuario ya creado en la base de datos 
 class Clase3(APIView):
     #ESTA VEZ SERA POST
@@ -167,7 +169,7 @@ class Clase3(APIView):
             return Response({"estado": "error", "mensaje": "Recurso no disponible"}, 
                             status=status.HTTP_404_NOT_FOUND)
         #PARA VALIDAR EL PASSWORD
-        #authentica valida el correo y el pasword ademas si el usuario esta activo
+        #auth valida el correo y el pasword ademas si el usuario esta activo
         #si el usuario esta activo y el password es correcto
         #entonces retorna un objeto de autenticacion , de lo contario
         #retorna None, o se ejecuta el bloque de else
@@ -178,7 +180,7 @@ class Clase3(APIView):
         if auth is not None:
             #construir el token
             fecha = datetime.now()
-            #generar uan variable llamada despues que es la fecha mas un dia
+            #generar una variable llamada: despues, que es la fecha mas un dia
             despues = fecha + timedelta(days=1)
             fecha_numero = int(datetime.timestamp(despues))
             #ahora se construye el payload

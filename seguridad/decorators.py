@@ -28,7 +28,9 @@ def logueado(): #opcional colocarle el parametro de redirect_url=None
                 return Response({"estado": "error", "mensaje":" no esta autorizado"}, status=HTTPStatus)
             #debido a que el token tiene dos partes primero se hace el Bearer y luego el token
             #se debe separar el token con el espacio 
+            #se crea una variable para obtener los headeers de la peticion
             header = req.headers.get('Authorization').split(' ')
+            resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS256'])
 
             try:
                 resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS256'])

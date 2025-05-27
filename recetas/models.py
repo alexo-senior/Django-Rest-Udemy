@@ -3,13 +3,17 @@ from autoslug import AutoSlugField
 #no sirve usar .models ya que tomaria el modelo de la app recetas
 #por eso se importa el modelo de categorias directamente
 from categorias.models import Categoria
+from django.contrib.auth.models import User
 
 
 # Create your models here.
 #LOS MODELOS SON LAS TABLAS DE MI BASE DE DATOS
 class Receta(models.Model):
-    
-    #llave foranea para relacionar las recetas a las categorias enteriores
+    #se crea una llave foranea para el usuario que creo la receta
+    #se le coloca en default 1 para que no este vacia la relacion
+    #la llave se cra para la relacion con la app de recetas_helper 
+    user = models.ForeignKey(User, models.DO_NOTHING, default=1 )
+    #se crea ademasllave foranea para relacionar las recetas a las categorias enteriores
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='recetas')
     nombre = models.CharField(max_length=100, null=False)
     #AutoSlugField genera automáticamente un slug basado en otro campo de tu modelo. Esto es muy útil porque te evita tener que crear y mantener slugs manualmente
@@ -22,6 +26,7 @@ class Receta(models.Model):
     descripcion = models.TextField()
     #para configurar la fecha ded forma automatica
     fecha = models.DateTimeField(auto_now_add=True, null=True)
+    
     
     
     
