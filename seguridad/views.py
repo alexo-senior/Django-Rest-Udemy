@@ -101,7 +101,8 @@ class Clase2(APIView):
             # data2 contiene el objeto UsersMetadata si se encuentra el token o es igua al que me viene en la url
             #y por medio de un nuevo filter ir a la tabla User y preguntar si 
             #el  campo is_active es igual a 0 , en filter() doble gion bajo a user__is_active
-            data2 = UsersMetadata.objects.filter(token=token).filter(user__is_active=0).get()
+            #data2 = UsersMetadata.objects.filter(token=token).filter(user__is_active=0).get()
+            data2 = UsersMetadata.objects.get(token=token, user__is_active=0) 
             # si no se encuentra el token se devuelve un error 
             # Si el token se encuentra, obtenemos el usuario asociado
             user = User.objects.get(id=data2.user_id)
@@ -178,11 +179,14 @@ class Clase3(APIView):
         #esto me retorna un objeto de autenticacion 
         #si el usuario no existe o el password es incorrecto 
         if auth is not None:
+            if not auth.is_active:
+                return Response({"estado": "error", "mensaje": "el usuario no esta activo"})
             #construir el token
             fecha = datetime.now()
             #generar una variable llamada: despues, que es la fecha mas un dia
             despues = fecha + timedelta(days=1)
             fecha_numero = int(datetime.timestamp(despues))
+            
             #ahora se construye el payload
             #
             payload={"id":user.id, "ISS":os.getenv("BASE_URL"), "iat":int(time.time()), "exp":int(fecha_numero)}

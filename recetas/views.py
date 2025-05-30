@@ -36,6 +36,7 @@ from django.conf import settings
         #el metodo data convierte el objeto en un diccionario de python
         return JsonResponse({"data": datos_json.data})"""
         
+        
 #LA CLASE1 SE TOMA PARA LOS GET Y POST YA QUE NO REQUIERE ID
 class Clase1(APIView):
     def get(self, request):
@@ -77,12 +78,7 @@ class Clase1(APIView):
             return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
                             
                         status=HTTPStatus.BAD_REQUEST)
-            #se crea una variable para obtener los headers de la peticion
-        header = request.headers.get('Authorization').split(' ')
-        #se valida que el token sea valido con el metodo decode() 
-        resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS256'])
-        #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria
-        #se usa el metodo filter() para filtrar los objetos de la categoria por id y luego se usa el metodo get() para obtener el objeto
+            
         try:
             categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
         except Categoria.DoesNotExist:
@@ -93,7 +89,9 @@ class Clase1(APIView):
         if Receta.objects.filter(nombre=request.data["nombre"]).exists():
                 #hago un retorno con un format para que salga mas especifica la busqueda errada
                 #el format en la respuesta de errores no es recomendable por la seguridad 
-            return Response({"estado": "error", "mensaje": f"El nombre {request.data['nombre']} no está disponible"}, status=HTTPStatus.BAD_REQUEST)
+            return Response({"estado": "error", "mensaje": f"El nombre{request.data['nombre']} no está disponible"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+                            
         
                             
         fs = FileSystemStorage()
@@ -118,27 +116,31 @@ class Clase1(APIView):
             except Exception as e:
                 return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
                                     status=HTTPStatus.BAD_REQUEST)
+            #se crea una variable para obtener los headers de la peticion
+        header = request.headers.get('Authorization').split(" ")
+        resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS512'])
+        #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria
+        #se usa el metodo filter() para filtrar los objetos de la categoria por id y luego se usa el metodo get() para obtener el objeto
                 
-            try:
-                # luego si no existe se crea la receta con create
-                Receta.objects.create(
-                        nombre=request.data["nombre"],
-                        tiempo=request.data["tiempo"],
-                        descripcion=request.data["descripcion"],
-                        categoria_id=request.data["categoria_id"],  # Corregido
-                        foto= foto, user_id=resuelto["id"],  # Asignar el ID del usuario desde el token
-                        # Asignar slug si se proporciona
+        try:
+            # luego si no existe se crea la receta con create
+            Receta.objects.create(
+                    nombre=request.data["nombre"],
+                    tiempo=request.data["tiempo"],
+                    descripcion=request.data["descripcion"],
+                    categoria_id=request.data["categoria_id"],  # Corregido
+                    foto= foto, user_id=resuelto["id"],  # Asignar el ID del usuario desde el token
+                    # Asignar slug si se proporciona
                         )
-                return Response(
+            return Response(
                     {"mensaje": "Receta creada exitosamente"},
                                 status=status.HTTP_201_CREATED)
-            except Exception as e:
+        except Exception as e:
                 # Captura errores durante la creación de la receta
                 # y devuelve un error 500 Internal Server Error
                 return Response(
                     {"error": f"Error al crear la receta: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                    )
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
             
         return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 

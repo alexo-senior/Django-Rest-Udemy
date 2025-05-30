@@ -12,7 +12,7 @@ class Receta(models.Model):
     #se crea una llave foranea para el usuario que creo la receta
     #se le coloca en default 1 para que no este vacia la relacion
     #la llave se cra para la relacion con la app de recetas_helper 
-    user = models.ForeignKey(User, models.DO_NOTHING, default=1 )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1 )
     #se crea ademasllave foranea para relacionar las recetas a las categorias enteriores
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='recetas')
     nombre = models.CharField(max_length=100, null=False)
