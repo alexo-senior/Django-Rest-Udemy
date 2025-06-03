@@ -79,11 +79,22 @@ class Clase1(APIView):
                             
                         status=HTTPStatus.BAD_REQUEST)
             
-        try:
+        #verifica la existencia de la categoriua antes de crear la receta
+        #se usa el metodo filter() para filtrar los objetos de la categoria por id
+        #se usa el metodo get() para obtener el objeto de la categoria
+        #se usa el metodo exists() para verificar si la categoria existe o no
+        #si la categoria  
+        if not Categoria.objects.filter(pk=request.data["categoria_id"]).exists():
+            return Response({"estado":"error", "mensaje": "la categoria no existe"},
+                    status=HTTPStatus.BAD_REQUEST)
+# Luego, en create, sigues usando categoria_id=request.data["categoria_id"]
+        """try:
             categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
         except Categoria.DoesNotExist:
             return Response({"estado":"error", "mensaje": "la categoria no existe"},
-                            status=HTTPStatus.BAD_REQUEST)
+                            status=HTTPStatus.BAD_REQUEST)"""
+            
+
             
             #primero se valida si la receta ya existe por el nombre con filter() y exist()
         if Receta.objects.filter(nombre=request.data["nombre"]).exists():
