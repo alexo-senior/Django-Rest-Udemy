@@ -2,6 +2,7 @@ from http import HTTPStatus
 from django.http.response import JsonResponse
 from django.utils.text import slugify
 from rest_framework.views import APIView
+from rest_framework import status
 from .models import Categoria
 from .serializers import CategoriaSerializer
 from django.http import Http404
@@ -82,7 +83,7 @@ class Clase2(APIView):
             #validacion en caso de que no exista el registro
         except Categoria.DoesNotExist:
             return JsonResponse({"estado": "error" , "mensaje": "el registro no existe"}, 
-            status=HTTPStatus.NOT_FOUND)
+            status=status.HTTP_404_NOT_FOUND)
             #validacion en caso que haya algun error
         except Exception as e:
             return JsonResponse({"estado": "error", "mensaje": "ocurrio un error"}, 
@@ -100,7 +101,7 @@ class Clase2(APIView):
             if not categoria.exists():
                 return JsonResponse(
                     {"estado": "error", "mensaje": "El registro no existe"},
-                    status=HTTPStatus.NOT_FOUND
+                    status=status.HTTP_404_NOT_FOUND
             )
             if Receta.objects.filter(categoria_id=id).exists():
                 return JsonResponse(

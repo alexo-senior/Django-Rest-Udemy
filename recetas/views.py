@@ -128,6 +128,7 @@ class Clase1(APIView):
                 return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
                                     status=HTTPStatus.BAD_REQUEST)
             #se crea una variable para obtener los headers de la peticion
+            #de esta forma se obtiene el token de autorizacion para el usuario logueado
         header = request.headers.get('Authorization').split(" ")
         resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS512'])
         #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria

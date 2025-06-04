@@ -25,7 +25,7 @@ def logueado(): #opcional colocarle el parametro de redirect_url=None
             #obtienes el request del metodo que decoraste con el decorador 
             req = args[0]
             if not req.headers.get('Authorization') or req.headers.get('Authorization')==None:
-                return Response({"estado": "error", "mensaje":" no esta autorizado"}, status=HTTPStatus)
+                return Response({"estado": "error", "mensaje":" no esta autorizado"}, status=HTTPStatus.UNAUTHORIZED)
             #debido a que el token tiene dos partes primero se hace el Bearer y luego el token
             #se debe separar el token con el espacio 
             #se crea una variable para obtener los headeers de la peticion
@@ -49,16 +49,15 @@ def logueado(): #opcional colocarle el parametro de redirect_url=None
     return metodo 
             
                 
-            #si el token es valido se ejecuta la funcion decorada
             
             
-            #SI EL TOKEN ES VALIDO
-            #como se decodifica el token
+            
+            
 
 
 # el decorador permite ejecutar una funcionalidad antes de ejecutar la funcion decorada
 # en este caso, el decorador logueado se ejecuta antes de la funcion post
-@logueado()
-def post():
-    pass
+    @logueado()
+    def post():
+        pass
 
