@@ -1,10 +1,15 @@
 from django.urls import path
 from .views import *
-from .views import Clase1
+
 
 #se crea la ruta en la url de la app categoria
 #laas validaciones aqui no son aconsejables, es mejor en la vista 
 urlpatterns = [
-    path('recetas_panel/<int:id>',Clase4.as_view()),#se le pasa el id del usuario  
-        
+    path('recetas/editar/foto', Clase1.as_view()),
+    path('recetas/slug/<str:slug>', Clase2.as_view()),
+    path('recetas_panel/<int:id>', Clase4.as_view()),
+    
 ]
+
+
+

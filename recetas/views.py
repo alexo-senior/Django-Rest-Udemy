@@ -117,7 +117,8 @@ class Clase1(APIView):
             #si es correcto se ejecuta todo el bloque de creacion y en caso de error las excepciones
             
             #se hace un print para probar
-        print(request.FILES["foto"].content_type)
+        #print(request.FILES["foto"].content_type)
+        """mimetime"""
         if request.FILES["foto"].content_type == "image/jpeg" or request.FILES["foto"].content_type == "image/png":
                 
             try:
@@ -141,12 +142,14 @@ class Clase1(APIView):
                     tiempo=request.data["tiempo"],
                     descripcion=request.data["descripcion"],
                     categoria_id=request.data["categoria_id"],  # Corregido
-                    foto= foto, user_id=resuelto["id"],  # Asignar el ID del usuario desde el token
+                    foto= foto, 
+                    user_id=resuelto["id"]  # Asignar el ID del usuario desde el token
                     # Asignar slug si se proporciona
                         )
-            return Response(
-                    {"mensaje": "Receta creada exitosamente"},
-                                status=status.HTTP_201_CREATED)
+            
+            return Response({"estado":"ok",
+                    "mensaje": "Receta creada exitosamente"},
+                            status=status.HTTP_201_CREATED)
         except Exception as e:
                 # Captura errores durante la creación de la receta
                 # y devuelve un error 500 Internal Server Error

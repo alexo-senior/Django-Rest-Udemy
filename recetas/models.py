@@ -12,12 +12,18 @@ class Receta(models.Model):
     #se crea una llave foranea para el usuario que creo la receta
     #se le coloca en default 1 para que no este vacia la relacion
     #la llave se cra para la relacion con la app de recetas_helper 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1 )
-    #se crea ademasllave foranea para relacionar las recetas a las categorias enteriores
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
+    
+    #se crea ademas llave foranea para relacionar las recetas a las categorias enteriores
+    
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='recetas')
+    
     nombre = models.CharField(max_length=100, null=False)
+    
     #AutoSlugField genera automáticamente un slug basado en otro campo de tu modelo. Esto es muy útil porque te evita tener que crear y mantener slugs manualmente
     #el campo populate_from le dice al autslug que campo va a ser el que se va a tomar para generar el slug
+    
     slug = AutoSlugField(populate_from='nombre', max_length=50 )
     tiempo = models.CharField(max_length=100, null=True)
     #solo para guardar el nombre no la foto como tal no el archivo en si
