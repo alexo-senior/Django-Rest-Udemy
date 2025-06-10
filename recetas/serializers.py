@@ -12,15 +12,21 @@ class RecetaSerializer(serializers.ModelSerializer):
     categoria = serializers.ReadOnlyField(source='categoria.nombre')
     fecha = serializers.DateTimeField(format="%d/%m/%Y")
     imagen = serializers.SerializerMethodField()
+    #para que se puedan visualizar los datos del usuario
+    user = serializers.ReadOnlyField(source="user.first_name")
+    #user = serializers.ReadOnlyField(source="first_name")
 
     class Meta:
         model = Receta
-        fields = ["id", "nombre", "slug", "tiempo", "descripcion", "fecha", "categoria", "categoria_id", "imagen"]
+        fields = ["id", "nombre", "slug", "tiempo", 
+                "descripcion", "fecha", "categoria", 
+                "categoria_id", "imagen", "user_id", "user"]
 
     def get_imagen(self, obj):
         request = self.context.get('request')
         if obj.foto:
-            # Construye la URL absoluta usando MEDIA_URL y el request
+            """Construye la URL absoluta usando MEDIA_URL y el request
+            para que la imagen se pueda acceder desde el navegador o el frontend"""
             url = f"{settings.MEDIA_URL}recetas/{obj.foto}"
             if request is not None:
                 return request.build_absolute_uri(url)

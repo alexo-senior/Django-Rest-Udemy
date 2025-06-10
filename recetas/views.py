@@ -187,8 +187,9 @@ class Clase2(APIView):
                     "descripcion": data.descripcion,
                     "fecha": DateFormat(data.fecha).format("d/m/Y"),
                     "categoria_id": data.categoria_id,
-                    "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}"
-                }
+                    "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}",
+                    "user_id": data.user_id, "user":data.user.first_name 
+                }#lista ademas de los datos de la receta el nombre del usuario y el id del usuario 
             }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
             return Response({"estado": "error", "mensaje": "la receta no existe"},

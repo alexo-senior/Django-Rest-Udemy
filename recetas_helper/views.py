@@ -14,10 +14,14 @@ from django.core.files.storage import FileSystemStorage
 from dotenv import load_dotenv
 from django.utils.dateformat import DateFormat
 
-#Este metodo es solo para usuarios logeados  
-#las recetas deben ir asociadas a un usuario, por lo que se debe crear un modelo de usuario
-#es aconsejable reservar el usuario numero 1 para el administrador 
-#como nota se debe crear un metodo para proteger las vistas de recetas 
+
+"""Este metodo es solo para usuarios logeados  
+las recetas deben ir asociadas a un usuario, por lo que se debe crear un modelo de usuario
+es aconsejable reservar el usuario numero 1 para el administrador 
+como nota se debe crear un metodo para proteger las vistas de recetas """
+
+"""Este metodo es para editar la foto de una receta
+se debe validar que el usuario este logueado y que la receta exista"""
 
 class Clase1(APIView):
     #el decorador se usa aqui para evitar que el metodo sea publico
@@ -66,7 +70,7 @@ class Clase1(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
             
             
-"""Esta clase es para obtener todos los datos de una recet
+"""Esta clase es para obtener todos los datos de una receta
 por medio deel slug, este codigo se copio de la Clase2 de recetas""" 
             
 class Clase2(APIView):
@@ -91,7 +95,8 @@ class Clase2(APIView):
                     "descripcion": data.descripcion,
                     "fecha": DateFormat(data.fecha).format("d/m/Y"),
                     "categoria_id": data.categoria_id,
-                    "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}"
+                    "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}",
+                    "user_id": data.user_id, "user":data.user.first_name
                 }
             }, status=status.HTTP_200_OK)
         except Receta.DoesNotExist:
@@ -100,6 +105,27 @@ class Clase2(APIView):
         except Exception as e:
             # Maneja cualquier error de servidor
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+        
+    """"clase para mostrar las ultimas tres recetas, o de forma random
+    no se usa el decoraddor
+    ya que no es necesario que el usuario este logueado """    
+        
+class Clase3(APIView):
+    
+    def get(self, request):
+        """el truco para listar en formato random es usar order_by('?')
+        hara algo ssi como select * from recetas ordedr_by random()
+        se puede establecer un limite de registros colocando limit 3, ejemplo"""
+        data = Receta.objects.order_by('-id').all()[:3]
+        datos_json = RecetaSerializer(data, many=True)
+        return Response({"data": datos_json.data}, status=status.HTTP_200_OK)
+    """El resultado es la lista random de las tres recetas 
+    si no se quiere de forma random se le cambia ('?') por ('-id')"""
+        
+    
+        
 
             
             
