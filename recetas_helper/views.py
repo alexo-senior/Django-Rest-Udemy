@@ -13,6 +13,8 @@ from datetime import datetime
 from django.core.files.storage import FileSystemStorage
 from dotenv import load_dotenv
 from django.utils.dateformat import DateFormat
+from django.db.models import Q #para realizar consultas mas complejas  
+from categorias.models import Categoria 
 
 
 """Este metodo es solo para usuarios logeados  
@@ -147,6 +149,69 @@ class Clase4(APIView):
         #se crea una variable serializer para los datos de la receta      
         datos_json = RecetaSerializer(data, many=True)
         return Response({"data":datos_json.data },status=status.HTTP_200_OK)
+    
+    
+    """Esta clase es para buscar por categoria_id y por search
+    http://127.0.0.1:8000/api/v1/recetas-buscador?categoria_id=4&search=algo""" 
+class Clase5(APIView):
+    
+    def get(self, request):
+        
+        #validacion con el parametro categoria_id 
+        if request.GET.get("categoria_id") == None or not request.GET.get("categoria_id"):
+            
+            return Response(
+                {"estado":"error", "mensaje": "el campo categoria_id es necesario"},
+                status=status.HTTP_400_BAD_REQUEST)
+            
+            #validamos si la categoria existe o no
+            try:
+                existe = Categoria.objects.filter(id=request.GET.get("categoria_id")).get()
+            except Categoria.DoesNotExist:
+                return Response(
+                    {"estado":"error", "mensaje":"la categorias no se encuentra en la base de datos"
+                }, status=status.HTTP_404_NOT_FOUND)
+        
+        """seria ded esta forma: select * from recetas where categoria_id =6 and nombre
+        like '%algo'"""
+        """por medio de querystring se obtiene el primer filtro que es el categoria_id"""
+        
+        data = Receta.objects.filter(
+            categoria_id=request.GET.get("categoria_id")
+        ).filter(
+            nombre__icontains=request.GET.get("search")#otro filtro para buscar por search, con nombre__icontains
+        ).order_by('-id').all()
+        datos_json = RecetaSerializer(data, many=True,context={'request': request})
+        return Response({"data": datos_json.data}, status=status.HTTP_200_OK)
+        
+    
+    
+    
+    """Otra forma de hacer el bloque de codigo usando Q:
+    para consultas mas complejas 
+    
+    from django.db.models import Q
+
+class Clase5(APIView):
+    def get(self, request):
+        categoria_id = request.GET.get("categoria_id")
+        #si search no se envia toma por defecto un string vacio 
+        search = request.GET.get("search", "")
+
+        # Construye el filtro dinámico
+        filtros = Q()
+        if categoria_id:
+            filtros &= Q(categoria_id=categoria_id)
+        if search:
+            filtros &= Q(nombre__icontains=search) | Q(categoria__nombre__icontains=search)
+
+        data = Receta.objects.filter(filtros).order_by('-id').all()
+        datos_json = RecetaSerializer(data, many=True, context={'request': request})
+        return Response({"data": datos_json.data}, status=status.HTTP_200_OK)"""
+        
+        
+    
+    
     
     
     
