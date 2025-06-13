@@ -13,6 +13,9 @@ urllib3==2.3
 python-dotenv==1.0.1
 django-autoslug==1.9.8
 python-jose==3.3.0
+django-cors-headers==4.7.0
+
+
 
 
 

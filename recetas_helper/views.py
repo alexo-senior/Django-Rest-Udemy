@@ -98,12 +98,15 @@ class Clase2(APIView):
                     "fecha": DateFormat(data.fecha).format("d/m/Y"),
                     "categoria_id": data.categoria_id,
                     "imagen": f"{os.getenv('BASE_URL')}uploads/recetas/{data.foto}",
-                    "user_id": data.user_id, "user":data.user.first_name
+                    "user_id": data.user_id, 
+                    "user":data.user.first_name
                 }
             }, status=status.HTTP_200_OK)
+            
         except Receta.DoesNotExist:
             return Response({"estado": "error", "mensaje": "la receta no existe"},
                     status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
             # Maneja cualquier error de servidor
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -112,17 +115,22 @@ class Clase2(APIView):
         
     """"clase para mostrar las ultimas tres recetas, o de forma random
     no se usa el decoraddor
-    ya que no es necesario que el usuario este logueado """    
+    ya que no es necesario que el usuario este logueado 
+    ests Url es recetas-home """    
         
 class Clase3(APIView):
     
     def get(self, request):
         """el truco para listar en formato random es usar order_by('?')
-        hara algo ssi como select * from recetas ordedr_by random()
+        hara algo si como select * from recetas ordedr_by random()
         se puede establecer un limite de registros colocando limit 3, ejemplo"""
+        
         data = Receta.objects.order_by('-id').all()[:3]
-        datos_json = RecetaSerializer(data, many=True)
-        return Response({"data": datos_json.data}, status=status.HTTP_200_OK)
+        #datos_json se llamaba la variable 
+        serializador = RecetaSerializer(data, many=True)
+        
+        return Response({"data": serializador.data}, status=status.HTTP_200_OK)
+    
     """El resultado es la lista random de las tres recetas 
     si no se quiere de forma random se le cambia ('?') por ('-id')"""
         
@@ -132,7 +140,12 @@ class Clase3(APIView):
             
             
             
-    
+"""Esta clase es para validar la existencia del id de usuario
+y obtner la recetas por cada usuario logueado protegido
+ruta:http://127.0.0.1:8000/api/v1/recetas_panel/id
+para acceder se genera el token en loguin con cualquier usuario
+y luego se le pasa para listar y ver cuantas recetas creadas tiene el usuario
+"""    
     
 class Clase4(APIView):
     
@@ -140,19 +153,30 @@ class Clase4(APIView):
     def get(self, request, id):
         #validar que el id del usuario existe
         try:
-            usuario_existe = User.objects.get(pk=id)#omito el uso de filter, solo uso get(pk=id) 
+            #usuario_existe = 
+            User.objects.get(pk=id)#omito el uso de filter, solo uso get(pk=id) 
         except User.DoesNotExist:
             return Response({"estado": "error", "mensaje": "ocurrio un error en la consulta"},
             status=HTTPStatus.BAD_REQUEST) 
-            ##se obtiene el id del usuario logueado validando que exista
+            ##lista las recetas por el id ordenadas de ultimo a primero
+            #lista por un usuario en particular
         data = Receta.objects.filter(user_id=id).order_by('-id').all()
-        #se crea una variable serializer para los datos de la receta      
-        datos_json = RecetaSerializer(data, many=True)
-        return Response({"data":datos_json.data },status=status.HTTP_200_OK)
+        
+        #se crea una variable llamada serializador para los datos de la receta 
+        serializador = RecetaSerializer(data, many=True)
+        
+        return Response({"data":serializador.data },status=status.HTTP_200_OK)
+        
+    
+    
+    
+    
     
     
     """Esta clase es para buscar por categoria_id y por search
     http://127.0.0.1:8000/api/v1/recetas-buscador?categoria_id=4&search=algo""" 
+    
+    
 class Clase5(APIView):
     
     def get(self, request):
@@ -165,14 +189,14 @@ class Clase5(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
             
             #validamos si la categoria existe o no
-            try:
-                existe = Categoria.objects.filter(id=request.GET.get("categoria_id")).get()
-            except Categoria.DoesNotExist:
-                return Response(
-                    {"estado":"error", "mensaje":"la categorias no se encuentra en la base de datos"
+        try:
+            existe = Categoria.objects.filter(id=request.GET.get("categoria_id")).get()
+        except Categoria.DoesNotExist:
+            return Response(
+                {"estado":"error", "mensaje":"la categorias no se encuentra en la base de datos"
                 }, status=status.HTTP_404_NOT_FOUND)
         
-        """seria ded esta forma: select * from recetas where categoria_id =6 and nombre
+        """seria de esta forma en mysql: select * from recetas where categoria_id =6 and nombre
         like '%algo'"""
         """por medio de querystring se obtiene el primer filtro que es el categoria_id"""
         

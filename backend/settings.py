@@ -59,11 +59,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'corsheaders',
     'home',
     'categorias',
     'recetas',
     'contacto',
     'seguridad',
+]
+
+#PARA CONCEDER PERMISO A LISTA DE URL o sitios
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:5173',
+]
+CORS_ORIGIN_REGEX_WHITELIST = [
+    'http://localhost:5173'
 ]
 
 MIDDLEWARE = [
@@ -74,6 +86,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = "backend.urls"
