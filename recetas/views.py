@@ -15,6 +15,9 @@ from django.core.files.storage import FileSystemStorage
 from seguridad.decorators import logueado
 from jose import jwt
 from django.conf import settings 
+from django.utils.text import slugify
+from datetime import datetime
+from drf_yasg.utils import swagger_auto_schema
 
 
 
@@ -38,103 +41,90 @@ from django.conf import settings
         
         
 #LA CLASE1 SE TOMA PARA LOS GET Y POST YA QUE NO REQUIERE ID
+
+    
+            
+            
+            
 class Clase1(APIView):
-    def get(self, request):
-        try:
-            """consulta los objetos receta ordenados de forma descendente por id"""
-            data = Receta.objects.order_by('-id').all()
-
-            if not data:
-                return Response(status=status.HTTP_204_NO_CONTENT)  # Devuelve 204 si no hay datos
-
-            datos_json = RecetaSerializer(data, many=True)
-            return Response({"data": datos_json.data}, status=status.HTTP_200_OK)  # Devuelve 200 OK
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            
-            
+    @swagger_auto_schema(
+        request_body=RecetaSerializer,
+        operation_description="crear una nueva receta",
+        responses={201:"receta ceada con exito",
+                400:"errorr de validacion"}
+    )
             
     #METODO POST PARA CREAR UNA NUEVA RECETA 
     #TENER EN CUENTA A MI PARECER QUE SOLO ACTUALIZA POR NOMBRE DE LA RECETA
     @logueado()
     #decorador para que solo se pueda acceder a esta vista si el usuario esta logueado
+    
     def post(self, request):
-        #validacion de cada campo esta vez el campo nombre
-        if request.data.get("nombre") == None or not request.data["nombre"]:
+        serializer = RecetaSerializer(data= request.data)
+        if not serializer.is_valid():
+            return Response({"estado": "error", "mensaje": serializer.errors},
+                        status=status.HTTP_400_BAD_REQUEST)
             
-            return Response({"estado":"error", "mensaje": "el campo nombre es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-        #validacion de cada campo esta vez el campo tiempo
-        if request.data.get("tiempo") == None or not request.data["tiempo"]:
-            return Response({"estado":"error", "mensaje": "el campo tiempo es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-        #validacion de cada campo esta vez el campo descripcion
-        if request.data.get("descripcion") == None or not request.data["descripcion"]:
-            return Response({"estado":"error", "mensaje": "el campo descripcion es obligatorio"}, 
-                        status=HTTPStatus.BAD_REQUEST)
-        #validacion de cada campo esta vez el campo cateoria_id    
-        if request.data.get("categoria_id") == None or not request.data["categoria_id"]:
-            return Response({"estado":"error", "mensaje": "el campo categoria_id es obligatorio"}, 
-                            
-                        status=HTTPStatus.BAD_REQUEST)
-            
-        #verifica la existencia de la categoriua antes de crear la receta
-        #se usa el metodo filter() para filtrar los objetos de la categoria por id
-        #se usa el metodo get() para obtener el objeto de la categoria
-        #se usa el metodo exists() para verificar si la categoria existe o no
-        #si la categoria  
+        """validacion de los campos parra la receta, con un bucle for
+        se hace mas sencillo y evita repetir codigo"""
+        
+        campos_obligatorios = ["nombre", "tiempo", "descripcion", "categoria_id", "foto"]
+        for campo in campos_obligatorios:
+            if not request.data.get(campo):
+                return Response({"estado": "error", "mensaje": f"el campo {campo} es obligatorio"},
+                                status=status.HTTP_400_BAD_REQUEST)
+                
+        """valida primero la existencia de la categoria"""
+        
         if not Categoria.objects.filter(pk=request.data["categoria_id"]).exists():
             return Response({"estado":"error", "mensaje": "la categoria no existe"},
                     status=HTTPStatus.BAD_REQUEST)
-# Luego, en create, sigues usando categoria_id=request.data["categoria_id"]
-        """try:
-            categoria = Categoria.objects.filter(pk=request.data["categoria_id"]).get()
-        except Categoria.DoesNotExist:
-            return Response({"estado":"error", "mensaje": "la categoria no existe"},
-                            status=HTTPStatus.BAD_REQUEST)"""
             
-
-            
-            #primero se valida si la receta ya existe por el nombre con filter() y exist()
+        """valida el nombre de la receta, si ya existe no se puede crear con ese nombre""" 
+        
         if Receta.objects.filter(nombre=request.data["nombre"]).exists():
                 #hago un retorno con un format para que salga mas especifica la busqueda errada
                 #el format en la respuesta de errores no es recomendable por la seguridad 
             return Response({"estado": "error", "mensaje": f"El nombre{request.data['nombre']} no está disponible"}, 
                             status=HTTPStatus.BAD_REQUEST)
-                            
-        
-                            
-        fs = FileSystemStorage()
             
+        """validar y guardar la foto"""     
         try:
             fecha = datetime.now()  # Define 'fecha' with the current datetime
             foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['foto']))[1]}"
         except Exception as e:
             return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
                                 status=HTTPStatus.BAD_REQUEST)
-            #valida antes de guardar la foto que los formatos sean jpg o png
-            #si es correcto se ejecuta todo el bloque de creacion y en caso de error las excepciones
             
-            #se hace un print para probar
-        #print(request.FILES["foto"].content_type)
         """mimetime"""
-        if request.FILES["foto"].content_type == "image/jpeg" or request.FILES["foto"].content_type == "image/png":
+        if request.FILES["foto"].content_type not in ["image/jpeg", "image/png"]:
+            return Response({"estado": "error", "mensaje": "Formato de imagen no valido"},
+                            status=status.HTTP_400_BAD_REQUEST)
+                            
+        try:
+            fs = FileSystemStorage()
                 
-            try:
-                fs.save(f"recetas/{foto}",request.FILES['foto'])
+            fs.save(f"recetas/{foto}",request.FILES['foto'])
+                
             #retorna la url del archivo y hace el guardado de forma completa
-                fs.url(request.FILES['foto'])
-            except Exception as e:
-                return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
+            
+            fs.url(request.FILES['foto'])
+            
+        except Exception as e:
+            return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
                                     status=HTTPStatus.BAD_REQUEST)
-            #se crea una variable para obtener los headers de la peticion
-            #de esta forma se obtiene el token de autorizacion para el usuario logueado
-        header = request.headers.get('Authorization').split(" ")
-        resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS512'])
-        #validar que la categoria exista, no se usa ids porque no es el nombre de la categoria
-        #se usa el metodo filter() para filtrar los objetos de la categoria por id y luego se usa el metodo get() para obtener el objeto
-                
+        
+        header = request.headers.get('Authorization', '').split(" ")    
+        if len(header) != 2:
+            return Response({"estado": "error", "mensaje": "Token de autorización inválido"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS512'])
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": f"Token inválido: {str(e)}"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+                                
+        slug= slugify(request.data["nombre"])
         try:
             # luego si no existe se crea la receta con create
             Receta.objects.create(
@@ -156,10 +146,30 @@ class Clase1(APIView):
                 return Response(
                     {"error": f"Error al crear la receta: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    """obtener las recetas de forma general"""        
+    
+    def get(self, request):
+        try:
+            """consulta los objetos receta ordenados de forma descendente por id"""
+            data = Receta.objects.order_by('-id').all()
+
+            if not data:
+                return Response(status=status.HTTP_204_NO_CONTENT)  # Devuelve 204 si no hay datos
+
+            datos_json = RecetaSerializer(data, many=True)
+            return Response({"data": datos_json.data}, status=status.HTTP_200_OK)  # Devuelve 200 OK
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
+        
+                    
+        
+        
+        
+                
     
             
-        return Response({"estado": "error", "mensaje": "Formato de imagen no válido. Solo se permiten JPG y PNG."}, 
-                        status=HTTPStatus.BAD_REQUEST)
+        
         
             
 

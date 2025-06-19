@@ -35,17 +35,30 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
     path('', include('home.urls')),#ruta base de home
+    
     path('api/v1/',include('ejemplo.urls')),#ruta base de ejemplo
+    
     path('api/v1/',include('categorias.urls')),#la ruta base de categorias
+    
+    path('api/v1/',include('contacto.urls')),#la ruta de contacto
+    
     path('api/v1/',include('recetas.urls')),#la ruta de recetas nueva app recetas
+    
     path('api/v1/', include(seguridad_urls)),
+    
     path('api/v1/', include(recetas_helper_urls)),  # Import the recetas_helper.urls module
+    
     #se configura tal cual como dice la documentacion oficial
+    
     path('documentacion<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    
     #mi url general se llamara solo documentacion
     path('documentacion/', schema_view.with_ui('swagger',cache_timeout=0), name='schema-swagger-ui'),
+    
     path('redoc/', schema_view.with_ui('redoc',cache_timeout=0), name='schema-redoc'),
+    
 ]
 
 #estos son los archivos que se encuentran en el settings.py, 
