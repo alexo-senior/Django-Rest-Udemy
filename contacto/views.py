@@ -23,6 +23,7 @@ class ContactoSerializer(serializers.Serializer):
 
 class Clase1(APIView):
     """configuracion para el swagger informacion del endpoint"""
+    
     @swagger_auto_schema(
         operation_description="Endpoint para contactos",
         responses={
@@ -43,37 +44,31 @@ class Clase1(APIView):
         )
     )
     def post(self, request):
+        
         """esto es un deserializador que recibe los datos del contacto de parte dedl cliente"""
+        
         serializer = ContactoSerializer(data=request.data)
+        
         """si los datos no son validos se arroja un mensaje de errror"""
+        
         if not serializer.is_valid():
             return Response({"estado": "error", "mensaje": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({"estado": "ok", "mensaje": "el mensaje fue enviado correctamente"}, status=status.HTTP_200_OK)
-        
-        """validaciones de cada campo de contacto"""
-        if not request.data.get("nombre"):
-            return Response({"estado":"error", "mensaje":"el campo nombre no puesde estar vacio"},
-                                status= HTTPStatus.BAD_REQUEST)
-        #validacion para que el campo correo no este vacio
-        if not request.data.get("correo"):
-            return Response({"estado":"error", "mensaje":"el campo correo no puesde estar vacio"},
-                                status= HTTPStatus.BAD_REQUEST)
-        #validacion para que el campo telefono no este vacio
-        if not request.data.get("telefono"):
-            return Response({"estado":"error", "mensaje":"el campo telefono no puesde estar vacio"},
-                                status= HTTPStatus.BAD_REQUEST)
-        #validacion para que el campo mensaje no este vacio
-        if not request.data.get("mensaje"):
-            return Response({"estado":"error", "mensaje":"el campo mensaje no puesde estar vacio"},
-                                status= HTTPStatus.BAD_REQUEST)
         """graba los datos en la base de datos en caso que no haya errores"""
+        
         try:
-            Contacto.objects.create(
-                nombre = request.data['nombre'],
-                correo = request.data['correo'],
-                telefono = request.data['telefono'],
-                mensaje = request.data['mensaje'])
+            contacto = Contacto.objects.create(**serializer.validated_data)
+            
+            return Response({"estado": "ok", "mensaje": "el contacto fue creado exitosamente"}, 
+                        status=status.HTTP_200_OK)
+            
+            
+    
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": f"ocurrio un error al guardar el mensaje: {str(e)}"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        
             
             #la fecha no se coloca porque se guarda automaticamente al crear el objeto
             # Contacto.objects.create, hay que tener en cuenta que ya se esta guardando la fecha.
@@ -91,10 +86,7 @@ class Clase1(APIView):
                 </body>
             """ 
             utiles.sendMail(html, "Mensaje de prueba y confirmacion", request.data['correo'])
-        except Exception as e:
-            #el format se usa para formatear el mensaje de error
-            return Response({"estado":"error", "mensaje":"ocurrio un error al guardar el mensaje: {}".format(str(e))}, 
-                            status=HTTPStatus.BAD_REQUEST)
+        
             
             
         
@@ -107,8 +99,16 @@ class Clase1(APIView):
         #"sin embargo hay que etener en cuanta que esta trabaja con el horario que hayamos configurado en el servidor
         #por lo que si el servidor esta en otro horario, la fecha que se guarda sera la del servidor y no la del cliente"
         
-        
-        
+class ContactoListView(APIView):
+    @swagger_auto_schema(
+            operation_description="lista de todos los contactos",
+            responses={200: ContactoSerializer(many=True)}
+        )
+    def get(self, request):
+    
+        data = Contacto.objects.order_by('-id').all()
+        serializer = ContactoSerializer(data, many=True, context={'request':request})    
+        return Response({"estado": "ok", "mensaje": "listados con exito", "data": serializer.data}, status=status.HTTP_200_OK)
         
         
         

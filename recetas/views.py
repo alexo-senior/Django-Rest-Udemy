@@ -4,6 +4,9 @@ from django.http import JsonResponse, Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response  # Importa Response
 from .serializers import RecetaSerializer
+from . serializers import RecetaInputSerializer
+from rest_framework import serializers
+
 from .models import *
 from rest_framework import status #import status
 from django.utils.dateformat import DateFormat
@@ -18,14 +21,6 @@ from django.conf import settings
 from django.utils.text import slugify
 from datetime import datetime
 from drf_yasg.utils import swagger_auto_schema
-
-
-
-
-
-
-
-
 
 # Create your views here.
 """class Clase1(APIView):
@@ -42,9 +37,6 @@ from drf_yasg.utils import swagger_auto_schema
         
 #LA CLASE1 SE TOMA PARA LOS GET Y POST YA QUE NO REQUIERE ID
 
-    
-            
-            
             
 class Clase1(APIView):
     @swagger_auto_schema(
@@ -60,12 +52,12 @@ class Clase1(APIView):
     #decorador para que solo se pueda acceder a esta vista si el usuario esta logueado
     
     def post(self, request):
-        serializer = RecetaSerializer(data= request.data)
+        serializer = RecetaSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({"estado": "error", "mensaje": serializer.errors},
                         status=status.HTTP_400_BAD_REQUEST)
             
-        """validacion de los campos parra la receta, con un bucle for
+        """validacion de los campos para la receta, con un bucle for
         se hace mas sencillo y evita repetir codigo"""
         
         campos_obligatorios = ["nombre", "tiempo", "descripcion", "categoria_id", "foto"]
@@ -88,7 +80,7 @@ class Clase1(APIView):
             return Response({"estado": "error", "mensaje": f"El nombre{request.data['nombre']} no está disponible"}, 
                             status=HTTPStatus.BAD_REQUEST)
             
-        """validar y guardar la foto"""     
+        """validar la foto y el archivo corecto para la foto"""     
         try:
             fecha = datetime.now()  # Define 'fecha' with the current datetime
             foto = f"{datetime.timestamp(fecha)}{os.path.splitext(str(request.FILES['foto']))[1]}"
@@ -96,11 +88,12 @@ class Clase1(APIView):
             return Response({"estado":"error", "mensaje":f"debe adjuntar una foto {str(e)}"},
                                 status=HTTPStatus.BAD_REQUEST)
             
-        """mimetime"""
+        """mimetype hace referencia al tipo de archivo de la imagen, por jemplo jpeg o png"""
         if request.FILES["foto"].content_type not in ["image/jpeg", "image/png"]:
             return Response({"estado": "error", "mensaje": "Formato de imagen no valido"},
                             status=status.HTTP_400_BAD_REQUEST)
-                            
+            
+        """subir y guaradar la foto"""                    
         try:
             fs = FileSystemStorage()
                 
@@ -113,28 +106,41 @@ class Clase1(APIView):
         except Exception as e:
             return Response({"estado":"error", "mensaje":f"se produjo un error al subir el archivo {str(e)}"},
                                     status=HTTPStatus.BAD_REQUEST)
+        """Obtener el token de la cabecera de autorizacion"""
         
-        header = request.headers.get('Authorization', '').split(" ")    
+        header = request.headers.get('Authorization', '').split(" ")
+        
+        """verifica que el formato del token sea el correcto y quie este dividido en dos partes"""    
+        
         if len(header) != 2:
             return Response({"estado": "error", "mensaje": "Token de autorización inválido"},
                             status=status.HTTP_401_UNAUTHORIZED)
+        """"decodifica el token JWT """
         try:
             resuelto = jwt.decode(header[1], settings.SECRET_KEY, algorithms=['HS512'])
         except Exception as e:
             return Response({"estado": "error", "mensaje": f"Token inválido: {str(e)}"},
                             status=status.HTTP_401_UNAUTHORIZED)
+            
+        """Genera el slug a apartir del nombre de la receta"""
                                 
         slug= slugify(request.data["nombre"])
+        
         try:
-            # luego si no existe se crea la receta con create
+            """se crea la receta en caso que no exista en la base de datos, usa create
+            ademas recibe los datos del usuario que esta creando la rececta"""
+            
+            """asigan la receta del usuario autenticado, usando el id extraido
+            del token JWT decodificado(resuelto)"""
+            
             Receta.objects.create(
                     nombre=request.data["nombre"],
                     tiempo=request.data["tiempo"],
                     descripcion=request.data["descripcion"],
                     categoria_id=request.data["categoria_id"],  # Corregido
                     foto= foto, 
-                    user_id=resuelto["id"]  # Asignar el ID del usuario desde el token
-                    # Asignar slug si se proporciona
+                    user_id=resuelto["id"] 
+                    
                         )
             
             return Response({"estado":"ok",
@@ -146,6 +152,8 @@ class Clase1(APIView):
                 return Response(
                     {"error": f"Error al crear la receta: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                
         
     """obtener las recetas de forma general"""        
     
@@ -165,19 +173,71 @@ class Clase1(APIView):
                     
         
         
-        
-                
-    
-            
-        
-        
-            
-
-
-            
+                    
 #CONSULTAR RECETA POR ID            
-#LA CLASE2 SE TOMA PARA LOS GET, PUT  Y DELETE YA QUE REQUIERE ID   
+#LA CLASE2 SE TOMA PARA LOS GET, PUT  Y DELETE YA QUE REQUIERE ID
+
 class Clase2(APIView):
+    @swagger_auto_schema(
+        request_body=RecetaInputSerializer,
+        operation_description="Actualizar la receta por el ID",
+        responses={200:"la receta se actualizo de forma correcta",
+                400:"error de validacion"}
+    )
+            
+    #METODO PUT PARA ACTUALIZAR UNA RECETA POR ID    
+    def put(self, request, id):
+        serializer = RecetaInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"estado": "error", "mensaje": serializer.errors},
+                            status=status.HTTP_400_BAD_REQUEST)
+        # Validaciones antes de buscar la receta opcionales
+        
+        """if request.data.get("nombre") is None or not request.data["nombre"]:
+            return Response({"estado": "error", "mensaje": "el campo nombre es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        if request.data.get("tiempo") is None or not request.data["tiempo"]:
+            return Response({"estado": "error", "mensaje": "el campo tiempo es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)
+
+        if request.data.get("descripcion") is None or not request.data["descripcion"]:
+            return Response({"estado": "error", "mensaje": "el campo descripcion es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)"""
+
+        """if request.data.get("categoria_id") is None or not request.data["categoria_id"]:
+            return Response({"estado": "error", "mensaje": "el campo categoria_id es obligatorio"}, 
+                            status=HTTPStatus.BAD_REQUEST)"""
+
+        # Validar que la categoría exista antes de actualizar
+        # Se usa filter() y get() para obtener el objeto de la categoría
+        try:
+            categoria = Categoria.objects.get(pk=request.data["categoria_id"])
+        except Categoria.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "la categoria no existe"},
+                            status=HTTPStatus.BAD_REQUEST)
+
+        # Buscar la receta
+        try:
+            receta = Receta.objects.get(id=id)
+        except Receta.DoesNotExist:
+            return Response({"mensaje": "receta no existe"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Actualizar los campos de la receta
+        receta.nombre = request.data.get("nombre", receta.nombre)
+        receta.tiempo = request.data.get("tiempo", receta.tiempo)
+        receta.descripcion = request.data.get("descripcion", receta.descripcion)
+        #receta.categoria = request.data.get("categoria", receta.categoria)  # Asigna el objeto de la categoría
+        receta.categoria_id = request.data.get("categoria_id", receta.categoria_id)
+
+        # Guardar los cambios
+        try:
+            receta.save()
+            return Response({"mensaje": "receta actualizada correctamente"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    
     def get(self, request, id):
         try:
             # Consulta los objetos receta por id
@@ -208,54 +268,6 @@ class Clase2(APIView):
             # Maneja cualquier error de servidor
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                                     
-            
-            
-            
-    #METODO PUT PARA ACTUALIZAR UNA RECETA POR ID    
-    def put(self, request, id):
-        # Validaciones antes de buscar la receta
-        if request.data.get("nombre") is None or not request.data["nombre"]:
-            return Response({"estado": "error", "mensaje": "el campo nombre es obligatorio"}, 
-                            status=HTTPStatus.BAD_REQUEST)
-
-        if request.data.get("tiempo") is None or not request.data["tiempo"]:
-            return Response({"estado": "error", "mensaje": "el campo tiempo es obligatorio"}, 
-                            status=HTTPStatus.BAD_REQUEST)
-
-        if request.data.get("descripcion") is None or not request.data["descripcion"]:
-            return Response({"estado": "error", "mensaje": "el campo descripcion es obligatorio"}, 
-                            status=HTTPStatus.BAD_REQUEST)
-
-        if request.data.get("categoria_id") is None or not request.data["categoria_id"]:
-            return Response({"estado": "error", "mensaje": "el campo categoria_id es obligatorio"}, 
-                            status=HTTPStatus.BAD_REQUEST)
-
-        # Validar que la categoría exista antes de actualizar
-        # Se usa filter() y get() para obtener el objeto de la categoría
-        try:
-            categoria = Categoria.objects.get(pk=request.data["categoria_id"])
-        except Categoria.DoesNotExist:
-            return Response({"estado": "error", "mensaje": "la categoria no existe"},
-                            status=HTTPStatus.BAD_REQUEST)
-
-        # Buscar la receta
-        try:
-            receta = Receta.objects.get(id=id)
-        except Receta.DoesNotExist:
-            return Response({"mensaje": "receta no existe"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Actualizar los campos de la receta
-        receta.nombre = request.data.get("nombre", receta.nombre)
-        receta.tiempo = request.data.get("tiempo", receta.tiempo)
-        receta.descripcion = request.data.get("descripcion", receta.descripcion)
-        receta.categoria = categoria  # Asigna el objeto de la categoría
-
-        # Guardar los cambios
-        try:
-            receta.save()
-            return Response({"mensaje": "receta actualizada correctamente"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
             
