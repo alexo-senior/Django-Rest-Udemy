@@ -40,6 +40,8 @@ class RecetaSerializer(serializers.ModelSerializer):
     
 # En tu archivo serializers.py
 #este serializazdor es solo para usar en put, y tambien puede ser usado en post
+#este serializador es de entrada para que el usuario coloque los datos por eso los 
+#parentesis vacios
 class RecetaInputSerializer(serializers.Serializer):
     nombre = serializers.CharField()
     tiempo = serializers.CharField()

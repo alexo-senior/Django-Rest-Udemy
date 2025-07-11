@@ -15,7 +15,7 @@ class Contacto(models.Model):
     
     #fecha = models.DateTimeField(default=datetime.now, blank=True)
 
-    def __str(self):
+    def __str__(self):
         return self.nombre
     
 

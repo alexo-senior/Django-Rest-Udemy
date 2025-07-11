@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mensaje de contacto</title>
+</head>
+<body>
+    <h1>Gracias por contactarnos, {{ data.nombre }}</h1>
+    <p>Hemos recibido tu mensaje y te responderemos a la brevedad posible.</p>
+    
+    <h2>Resumen de tu mensaje:</h2>
+    <p><strong>Nombre:</strong> {{ data.nombre }}</p>
+    <p><strong>Correo:</strong> {{ data.correo }}</p>
+    <p><strong>Teléfono:</strong> {{ data.telefono }}</p>
+    <p><strong>Mensaje:</strong></p>
+    <p>{{ data.mensaje }}</p>
+</body>
+</html>
