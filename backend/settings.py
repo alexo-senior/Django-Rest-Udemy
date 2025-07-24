@@ -70,14 +70,6 @@ INSTALLED_APPS = [
 
 #PARA CONCEDER PERMISO A LISTA DE URL o sitios
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:5173',
-]
-CORS_ORIGIN_REGEX_WHITELIST = [
-    'http://localhost:5173'
-]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -89,6 +81,16 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware'
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:5173',
+]
+CORS_ORIGIN_REGEX_WHITELIST = [
+    'http://localhost:5173'
+]
+
 
 ROOT_URLCONF = "backend.urls"
 

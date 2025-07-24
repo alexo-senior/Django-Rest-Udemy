@@ -129,8 +129,12 @@ class ContactoListView(APIView):
     def get(self, request, *args, **kwargs):
         #se sobreescribe el metodo 'list' para manetenr la estructura
         #de respuesta  personalizada
+        #obtiene los contactos del modelo de contactos en forma descenedente
         data = Contacto.objects.order_by('-id').all()
-        serializer = ContactoSerializer(data, many=True, context={'request': request})    
+        #luego los pasa al Contactoserializer para convertirlos en json, many=true indica una lista
+        #de objetos
+        serializer = ContactoSerializer(data, many=True, context={'request': request})  
+        #se connstruye la respuesta como un diccionario con tres claves valor  
         return Response({
             'estado': 'ok',
             'mensaje': 'listados con exito',
