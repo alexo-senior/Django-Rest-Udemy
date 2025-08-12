@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import SobreNosotros from '@/views/SobreNosotros.vue'
 
 
 const router = createRouter({
@@ -8,6 +9,11 @@ const router = createRouter({
       path:'/',
       component: ()=>import('@/views/home.vue'),
       name:'home'
+    },
+    {
+      path:'/sobre-nosotros',
+      component: SobreNosotros
+      
     }
   ],
 })
