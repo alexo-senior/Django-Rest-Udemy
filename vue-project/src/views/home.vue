@@ -1,6 +1,16 @@
 <script setup>
 import encabezado from '@/components/icons/encabezado.vue';
 import Footer from './Footer.vue';
+import { onMounted, ref } from 'vue';
+import { getDatosHome } from '@/services/homeservice';
+
+let datos = ref([]);//declarar una variable de tipo reactiva
+
+onMounted(async()=>
+{
+  datos.value = await getDatosHome();
+});
+
 </script>
 
 <template>
