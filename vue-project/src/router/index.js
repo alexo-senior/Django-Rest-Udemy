@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import SobreNosotros from '@/views/SobreNosotros.vue'
+
+import Error404 from '@/views/Error404.vue'
 
 
 const router = createRouter({
@@ -13,7 +16,11 @@ const router = createRouter({
     {
       path:'/sobre-nosotros',
       component: SobreNosotros
-      
+
+    },
+    {
+      path:'/:pathMatch(.*)*',
+      component: Error404
     }
   ],
 })
