@@ -1,5 +1,5 @@
 <script setup>
-import encabezado from '@/components/icons/encabezado.vue';
+import encabezado from '@/components/icons/Header.vue';
 import Footer from './Footer.vue';
 </script>
 
