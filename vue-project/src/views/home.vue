@@ -2,7 +2,7 @@
 import Header from '@/components/icons/Header.vue';// Asegúrate de que la ruta sea correcta
 import Footer from '@/views/Footer.vue';
 import { onMounted, ref } from 'vue';
-import { getDatosHome } from '@/services/homeservice';
+import { getDatosHome } from '@/services/homeservice'; 
 
 let datos = ref([]);
 
